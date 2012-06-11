@@ -53,3 +53,45 @@ void solution::print(void){
             cout << endl;
         }
 }
+
+
+double solution::evaluate_time(int **tt){
+    double total_time = 0;
+
+    for(int j=0; j<n_routes; j++){
+        for(int i=0; i<n_nodes; i++){
+            total_time += sol_m[i][j] > 0 && (i != sol_m[i][j]) && tt[i][sol_m[i][j]] > 0 ? tt[i][sol_m[i][j]] : 0;
+        }
+    }
+
+    return  total_time;
+}
+
+double solution::evaluate_demand(int **td){
+    /*evaluate_demand()
+
+        Retorna la evaluación respecto a la demanda satisfecha
+
+        input: demand matrix table.}
+
+        returns: double: sum of alls satisfied demands.
+    */
+
+
+    double total_demand = 0;
+
+    for(int j=0; j<1; j++){
+        for(int i=0; i<n_nodes; i++){
+            for(int k=0; k<n_nodes; k++){
+                if(i==k)
+                    continue;
+                else{
+                    total_demand +=  sol_m[i][j] == k && sol_m[i][j] >= 0 ?  td[i][k] : 0; 
+                }
+            }
+            
+        }
+    }
+
+    return  total_demand;
+}
