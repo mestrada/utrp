@@ -1,0 +1,32 @@
+Algoritmo para generar una ruta desde un punto a otro, evitando colisiones
+En la carpeta soluciones hay 5 archivos de soluciones generadas para cada uno de los mapas de prueba.
+Formato de ejecución:
+
+make genera el ejecutable 2dmpp.
+
+1.- make
+2.- ./2dmpp archivo_entrada.txt
+
+
+
+Formato de salida:
+
+Al ejecutar 2dmpp se obtendrá un archivo llamado solucion.txt en el formato requerido, 
+con la mejor solución encontrada. 
+
+40 30 
+300
+1 1 0 0 0 0 0 . . .
+0 1 0 . . . . . . .
+. . . . . . . . . . 
+. . . . . . . . . .
+. . . . . . . . . . 
+. . . . . . . . . .
+. . . . . . . . . .
+. . . . . . . . . 1
+
+Donde 40 es el número de columnas, 30 el número de filas, 300 el valor de la función objetivo y finalmente 
+la representación de la solución.
+ 
+
+make clean limpia todo, incluyendo la solucion.txt
