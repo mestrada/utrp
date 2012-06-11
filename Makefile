@@ -1,4 +1,4 @@
-OBJS = main.o   matrices.o
+OBJS = main.o   matrices.o solution.o
 CC = g++
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
@@ -8,4 +8,4 @@ all: $(OBJS)
 	$(CC)   $(LFLAGS)   $(OBJS) -o  urtp
 
 clean:
-	\rm *.o  solucion.txt 2dmpp
+	\rm *.o

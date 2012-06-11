@@ -1,9 +1,10 @@
 #include "solution.h"
 
+#include <iostream>
 
 using namespace std;
 
-solution::solution(void){ 
+solution::solution(){ 
 }
 
 
@@ -35,7 +36,7 @@ void solution::generate_solution(int **m_tt){
 
         for(int j=i+1; j<n_nodes; j++){
             if(m_tt[current_node][j] > 0){
-                sol_routes[j][initial_node] = current_node;
+                sol_m[j][initial_node] = current_node;
                 current_node = j;
             }
         
