@@ -1,6 +1,7 @@
 #include "solution.h"
 
 #include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -23,7 +24,11 @@ solution::solution(int sizeX, int sizeY):n_nodes(sizeX), n_routes(sizeY){
     }
 }
 
-
+solution::~solution(){
+    for (int i=0; i<n_nodes; i++)
+        delete [] sol_m[i];
+    delete [] sol_m; 
+}
 
 void solution::generate_solution(int **m_tt){
     int initial_node;
@@ -32,7 +37,7 @@ void solution::generate_solution(int **m_tt){
     for(int i=0; i<n_nodes; i++){
         initial_node = i;
         current_node = i;
-        sol_m[i][initial_node] = i;
+        sol_m[i][initial_node] = 0;
 
         for(int j=i+1; j<n_nodes; j++){
             if(m_tt[current_node][j] > 0){
@@ -41,10 +46,25 @@ void solution::generate_solution(int **m_tt){
             }
         
         }
+    sol.push_back(i);
+    }
+
+    for(int i=n_nodes-1; i>=0; i--){
+        initial_node = i + 15;
+        current_node = i;
+        sol_m[i][initial_node] = 0;
+
+        for(int j=i-1; j>0; j--){
+            if(m_tt[current_node][j] > 0){
+                sol_m[j][initial_node] = current_node;
+                current_node = j;
+            }
+        }
+    sol.push_back(i+15);
     }
 }
 
-void solution::print(void){
+void solution::print_fact_routes(void){
     cout << "Printing Solutions\n";
     for(int j=0; j<n_routes; j++){
             for(int i=0; i<n_nodes; i++){
@@ -54,20 +74,59 @@ void solution::print(void){
         }
 }
 
+void solution::print(void){
+    cout << "Printing actual vector solution" << endl;
+    vector<int>::iterator it;
+    for ( it=sol.begin() ; it < sol.end(); it++ ){
+        cout << *it << ", ";
+    }
+    cout << endl;
 
-double solution::evaluate_time(int **tt){
-    double total_time = 0;
+}
 
+bool solution::is_in(int value ){
+    vector<int>::iterator it;
+    for ( it=sol.begin() ; it < sol.end(); it++ ){
+        if(value == *it)
+            return true;
+    }
+
+    return false;
+}
+
+std::vector<int>  solution::get_current_sol(void){
+    return sol;
+}
+
+int solution::evaluate_time(int **tt){
+    /*evaluate_time()
+
+        Retorna la evaluación respecto al tiempo de las rutas
+
+        input: time matrix table.
+
+        returns: double: sum of alls times of the routes.
+    */
+    int total_time = 0;
+    int route_time = 0;
+    //cout << "Time by route" << endl;
     for(int j=0; j<n_routes; j++){
-        for(int i=0; i<n_nodes; i++){
-            total_time += sol_m[i][j] > 0 && (i != sol_m[i][j]) && tt[i][sol_m[i][j]] > 0 ? tt[i][sol_m[i][j]] : 0;
+        //route_time = 0;
+        if(is_in(j)){
+            for(int i=0; i<n_nodes; i++){
+                total_time += sol_m[i][j] > 0 && (i != sol_m[i][j]) && tt[i][sol_m[i][j]] > 0 ? tt[i][sol_m[i][j]] : 0;
+                //route_time += sol_m[i][j] > 0 && (i != sol_m[i][j]) && tt[i][sol_m[i][j]] > 0 ? tt[i][sol_m[i][j]] : 0;
+            }
+            //cout << "Time for route " << j << ": " << route_time << endl;
+
         }
+        
     }
 
     return  total_time;
 }
 
-double solution::evaluate_demand(int **td){
+int solution::evaluate_demand(int **td){
     /*evaluate_demand()
 
         Retorna la evaluación respecto a la demanda satisfecha
@@ -76,22 +135,70 @@ double solution::evaluate_demand(int **td){
 
         returns: double: sum of alls satisfied demands.
     */
-
-
-    double total_demand = 0;
-
-    for(int j=0; j<1; j++){
-        for(int i=0; i<n_nodes; i++){
-            for(int k=0; k<n_nodes; k++){
-                if(i==k)
-                    continue;
-                else{
-                    total_demand +=  sol_m[i][j] == k && sol_m[i][j] >= 0 ?  td[i][k] : 0; 
+    int total_demand = 0;
+    double route_demand = 0;
+    //cout << "One-Way Demand by route" << endl;
+    for(int j=0; j<n_routes; j++){
+        //route_demand = 0;
+        if(is_in(j)){
+            for(int i=0; i<n_nodes; i++){
+                for(int k=0; k<n_nodes; k++){
+                    if(i==k)
+                        continue;
+                    else{
+                        total_demand +=  sol_m[k][j] >= 0 && sol_m[k][j] == i ?  td[k][i] : 0; 
+                        //route_demand +=  sol_m[k][j] >= 0 && sol_m[k][j] == i ?  td[k][i] : 0; 
+                    }
                 }
             }
-            
+            //cout << "Covered Demand for route " << j << ": " << route_demand << endl;
+        }   
+    }
+    return  total_demand;
+}
+
+int solution::evaluate_cost(int **tt){
+    vector<int>::iterator it;
+    int total_cost = 0;
+    for ( it=sol.begin() ; it < sol.end(); it++ ){
+        total_cost += route_lenght(tt, *it);
+    }
+    return total_cost;
+}
+
+bool solution::change_sol(void){
+    double r;
+    vector<int>::iterator it;
+
+    for ( it=sol.begin() ; it < sol.end(); it++ ){
+        r = (double) rand() / RAND_MAX;
+
+        if(r < 0.10){
+            sol.erase(it);
+            break;
         }
     }
+    return true;
+}
 
-    return  total_demand;
+void solution::reset(void){
+    for(int i=0; i<n_routes; i++){
+        if(!is_in(i))
+            sol.push_back(i);
+    }
+}
+
+int solution::route_lenght(int **tt, int route){
+    int route_lenght = 0;
+    for(int i=0; i<n_nodes; i++){
+        if(sol_m[i][route] > 0){
+            route_lenght += tt[i][sol_m[i][route]];
+        }
+
+    }
+    return route_lenght;
+}
+
+int solution::get_n_routes(void){
+    return sol.size();
 }

@@ -23,11 +23,14 @@ matrices::matrices(const matrices& orig) {
 }
 
 matrices::~matrices() {   
-   /* int i;
-    for (i=0; i<n_nodes; i++)
-        delete [] matriz[i];
-
-    delete [] matriz; */
+    
+    for (int i=0; i<n_nodes; i++){
+        free(matriz1[i]);
+        free(matriz2[i]);
+    }
+    free(matriz1); 
+    free(matriz2);
+    
 }
 
 
