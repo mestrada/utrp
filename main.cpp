@@ -86,6 +86,7 @@ int main (int argc, char **argv)
 
         sol_set.generate_solution(m_tt);      
 
+        sol_set.print_fact_routes();
         sol_set.print();
         cout << "Valores del conjunto total";
         cout << "Eval total time: " << sol_set.evaluate_time(m_tt) << endl;
