@@ -18,6 +18,7 @@ using namespace std;
 #define N_ROUTES 30
 #define PENALTY_RATE 2
 #define MIN_ROUTES 5
+#define N_TOP_DEMAND_NODES 3
 
 int N_ITER;
 //int N_ROUTES;
@@ -85,6 +86,7 @@ int main (int argc, char **argv)
         m_tt = input.getMatriz2();
         input.print();
 
+        sol_set.find_top_demand_nodes(N_TOP_DEMAND_NODES, m_td);
         sol_set.generate_solution(m_tt);      
 
         sol_set.print_fact_routes();
@@ -93,13 +95,6 @@ int main (int argc, char **argv)
         cout << "Eval total time: " << sol_set.evaluate_time(m_tt) << endl;
         cout << "Eval total one-way demand: " << sol_set.evaluate_demand(m_td) << endl;
         cout << "N rutas en solución actual: " << sol_set.evaluate_cost(m_tt) << endl;
-
-
-        Graph G(N_NODES);
-        G.read(m_tt);
-        G.set_source(1);
-        G.dijkstra();
-        G.output();
 
 /*
         //HC

@@ -1,7 +1,10 @@
 #include "solution.h"
+#include "Graph.h"
 
 #include <iostream>
 #include <stdlib.h>
+
+#define length(a) ( sizeof ( a ) / sizeof ( *a ) )
 
 using namespace std;
 
@@ -28,9 +31,13 @@ solution::~solution(){
     for (int i=0; i<n_nodes; i++)
         delete [] sol_m[i];
     delete [] sol_m; 
+
+    delete [] top_demand_nodes;
+    delete [] top_demand;
 }
 
 void solution::generate_solution(int **m_tt){
+    /*
     int initial_node;
     int current_node;
 
@@ -61,7 +68,73 @@ void solution::generate_solution(int **m_tt){
             }
         }
     sol.push_back(i+15);
+    }*/
+
+    for(int index=0; index<top_tam; index++){
+        Graph G(n_nodes);
+        G.read(m_tt);
+        G.set_source(top_demand_nodes[index]);
+        G.dijkstra();
+        //G.print_deb();
+        G.output();
+        //G.~Graph();
     }
+
+}
+
+void solution::find_top_demand_nodes(int tam, int **td){
+    top_tam = tam;
+    top_demand_nodes = new int[tam];
+    top_demand = new int[tam];
+    for (int i=0; i<tam; i++){
+        top_demand[i] = 0;
+        top_demand_nodes[i] = -1;
+    }
+
+    for(int i=0; i<n_nodes; i++){
+        for(int j=0; j<n_nodes; j++){
+            if(td[i][j] > top_demand[0] && is_distinct(i)){
+                top_demand[0] = td[i][j];
+                top_demand_nodes[0] = i;
+                reorder();
+            }
+        }
+    }
+
+    cout << "Top Demand Nodes ..." << endl;
+    for(int i=0; i<tam; i++)
+        cout << top_demand_nodes[i] << ", ";
+    cout << endl;
+
+}
+//(int) length(top_demand_nodes)
+void solution::reorder(){
+    for(int i=0; i< top_tam - 1; i++){
+        if(top_demand[i] > top_demand[i+1]){
+            swap(i, i+1);
+        }
+    }
+}
+
+void solution::swap(int a, int b){
+    int swap_index, swap_value;
+
+    swap_index = top_demand_nodes[b];
+    swap_value = top_demand[b];
+
+    top_demand[b] = top_demand[a];
+    top_demand_nodes[b] = top_demand_nodes[a];
+
+    top_demand[a] = swap_value;
+    top_demand_nodes[a] = swap_index;
+}
+
+bool solution::is_distinct(int index){
+    for(int i=0; i<top_tam; i++){
+        if(top_demand_nodes[i] == index)
+            return false;
+    }
+    return true;
 }
 
 void solution::print_fact_routes(void){

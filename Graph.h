@@ -48,6 +48,7 @@ int getClosestUnmarkedNode();
 void dijkstra();
 void output();
 void printPath(int);
+void print_deb();
 };
 
 

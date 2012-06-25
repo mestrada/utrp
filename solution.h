@@ -9,15 +9,19 @@ class solution
     public:
         
         solution();
-        solution(int sizeX, int sizeY);
+        solution(int, int);
         ~solution();
-        void generate_solution(int **m_tt);
+        void generate_solution(int **);
+        void find_top_demand_nodes(int, int **);
+        void reorder();
+        void swap(int, int);
+        bool is_distinct(int);
         void print_fact_routes(void);
         void print(void);
         bool is_in(int);
         std::vector<int> get_current_sol(void);
-        int evaluate_time(int **tt);
-        int evaluate_demand(int **td);
+        int evaluate_time(int **);
+        int evaluate_demand(int **);
         int evaluate_cost(int**);
         bool change_sol(void);
         void reset(void);
@@ -29,6 +33,10 @@ class solution
         int n_nodes;
         int n_routes;
         vector<int> sol;
+        int *top_demand_nodes;
+        int *top_demand;
+        int top_tam;
+        int last_index = 0;
 
         //vector<coord> camino;
         //vector<coord> solution;

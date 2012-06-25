@@ -18,16 +18,16 @@ Graph::Graph(int n):numOfVertices(n){
 
 }
 
-void Graph::~Graph(){
+Graph::~Graph(){
 
     for(int i = 0; i<numOfVertices; i++){
-        delete adjMatrix[i];
+        delete [] adjMatrix[i];
     }
 
-    delete  adjMatrix;
-    delete predecessor;
-    delete  distance;
-    delete mark;
+    delete [] adjMatrix;
+    delete [] predecessor;
+    delete [] distance;
+    delete [] mark;
 
 }
 
@@ -105,7 +105,7 @@ void Graph::output()
 {
     for(int i=0;i<numOfVertices;i++) {
         if(i == source)
-            cout<<source+1<<".."<<source;
+            cout<<source+1<<".."<<source+1;
         else
             printPath(i);
 
@@ -113,6 +113,14 @@ void Graph::output()
     }
 }
 
+
+void Graph::print_deb(){
+    for(int i=0; i<numOfVertices; i++){
+        cout << "predecessor " << i << ": " << predecessor[i] << endl;
+        cout << "distance " << i << ": " << distance[i] << endl;
+        cout << "mark " << i << ": " << mark[i] << endl;
+    }
+}
 /*
 int main()
 {
