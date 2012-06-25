@@ -226,7 +226,7 @@ long solution::evaluate_time(int **tt, int **td){
     return (long) ptd/ (long) total_demand;
 }
 
-int solution::evaluate_demand(int **td){
+long solution::evaluate_demand(int **tt, int **td){
     /*evaluate_demand()
 
         Retorna la evaluación respecto a la demanda satisfecha
@@ -235,6 +235,7 @@ int solution::evaluate_demand(int **td){
 
         returns: double: sum of alls satisfied demands.
     */
+/*        
     int total_demand = 0;
     double route_demand = 0;
     //cout << "One-Way Demand by route" << endl;
@@ -255,11 +256,30 @@ int solution::evaluate_demand(int **td){
         }   
     }
     return  total_demand;
+    */
+    int current_time;
+    long total_demand = 0;
+    for(int i=0; i<n_nodes; i++){
+        for(int j=0; j<=i; j++){
+            current_time = 0;
+            if(td[i][j] <= 0)
+                continue;
+
+            current_time = get_shortest_time(i, j, tt);
+            if(current_time > 0)
+                total_demand += td[i][j];
+
+        }
+    }
+
+
+    return total_demand;
 }
 
-int solution::evaluate_cost(int **tt){
+
+long solution::evaluate_cost(int **tt){
     vector<int>::iterator it;
-    int total_cost = 0;
+    long total_cost = 0;
     for ( it=sol.begin() ; it < sol.end(); it++ ){
         total_cost += route_lenght(tt, *it);
     }
@@ -269,16 +289,32 @@ int solution::evaluate_cost(int **tt){
 bool solution::change_sol(void){
     double r;
     vector<int>::iterator it;
+    r = (double) rand() / RAND_MAX;
 
-    for ( it=sol.begin() ; it < sol.end(); it++ ){
-        r = (double) rand() / RAND_MAX;
+    if(r < 0.50){
+        for ( it=sol.begin() ; it < sol.end(); it++ ){
+            r = (double) rand() / RAND_MAX;
 
-        if(r < 0.10){
-            sol.erase(it);
-            break;
+            if(r < 0.10){
+                sol.erase(it);
+                return true;
+            }
         }
     }
-    return true;
+    else{
+        for(int i=0; i<n_routes; i++){
+            r = (double) rand() / RAND_MAX;
+            if(!is_in(i)){
+                if(r < 0.10){
+                    sol.push_back(i);
+                    return true;
+                }
+            }
+        }
+
+    }
+
+    return false;
 }
 
 void solution::reset(void){
@@ -327,6 +363,14 @@ int solution::get_shortest_time(int start, int end, int **tt){
             }
         }
     }
+   /* 
+    if(min_time == 999 | min_time < 0){
+        //cout << "MINT" << min_time << endl;
+        return 0;
+    }
+    else
+        cout << "MINT " << min_time << endl;
+    */
     return min_time;
 }
 

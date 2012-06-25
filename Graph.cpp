@@ -94,7 +94,7 @@ void Graph::dijkstra()
 void Graph::printPath(int node, int parent)
 {
     if(node == source){
-        cout<<node+1<<"..";
+        //cout<<node+1<<"..";
         insert_node(parent, node);
     }
     else if(predecessor[node] == -1)
@@ -102,7 +102,7 @@ void Graph::printPath(int node, int parent)
     //TODO: Clean Route
         else {
             printPath(predecessor[node], parent);
-            cout<<node+1<<"..";
+            //cout<<node+1<<"..";
             insert_node(parent, node);
         }
 }
@@ -110,12 +110,12 @@ void Graph::printPath(int node, int parent)
 void Graph::output()
 {
     for(int i=0;i<numOfVertices;i++) {
-        if(i == source)
-            cout<<source+1<<".."<<source+1;
+        if(i == source){}
+            //cout<<source+1<<".."<<source+1;
         else
             printPath(i, i);
 
-        cout<<"->"<<distance[i]<<endl;
+        //cout<<"->"<<distance[i]<<endl;
     }
 }
 

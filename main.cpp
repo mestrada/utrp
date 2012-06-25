@@ -20,6 +20,10 @@ using namespace std;
 #define MIN_ROUTES 5
 #define N_TOP_DEMAND_NODES 3
 
+#define P_TIME 0.3
+#define P_COST 0.2
+#define P_DEMAND 0.5
+
 int N_ITER;
 //int N_ROUTES;
 int N_RESTART;
@@ -40,6 +44,8 @@ valgrind -v --tool=memcheck --leak-check=full ./urtp
 Parámetros:  instancia_tiempo instanciat_demanda output N_ITER N_RESTART VECINDARIO SEMILLA
 Ejemplo:  td1.txt tt1.txt output 1000 20 30 1234567890
 */
+
+long eval(long, long, long);
 
 int main (int argc, char **argv)
 {
@@ -91,13 +97,59 @@ int main (int argc, char **argv)
 
         sol_set.print_fact_routes();
         sol_set.print();
-        cout << "Valores del conjunto total";
+        cout << "Valores del conjunto total" << endl;
         cout << "Eval total time: " << sol_set.evaluate_time(m_tt, m_td) << endl;
-        cout << "Eval total one-way demand: " << sol_set.evaluate_demand(m_td) << endl;
-        cout << "N rutas en solución actual: " << sol_set.evaluate_cost(m_tt) << endl;
+        cout << "Eval total one-way demand: " << sol_set.evaluate_demand(m_tt, m_td) << endl;
+        cout << "Costo: " << sol_set.evaluate_cost(m_tt) << endl;
+        cout << "FO: " << eval( sol_set.evaluate_time(m_tt, m_td), sol_set.evaluate_cost(m_tt), 
+            sol_set.evaluate_demand(m_tt, m_td) ) << endl;
+
+       int iter = 0, restart = 0;
+
+        double current_time;
+        double current_demand = 0;
+        double current_cost;
+
+        result r_best;
+        r_best = {1000000, 1000000, 0};
+
+        long best_fo = 9999999;
+
+        long current_fo;
+
+        while(iter < N_ITER && restart < N_RESTART){
+
+            current_cost = sol_set.evaluate_cost(m_tt);
+            current_time = (double) sol_set.evaluate_time(m_tt, m_td);
+            current_demand = sol_set.evaluate_demand(m_tt, m_td);
+            current_fo = eval(current_time, current_cost, current_demand);
+            
+            if(current_fo < best_fo  && best_fo != 0){
+                best_fo = current_fo;
+
+                r_best.time = current_time;
+                r_best.cost = current_cost;
+                r_best.demand = current_demand;
+            }
+
+            if(sol_set.get_n_routes() == MIN_ROUTES){
+                sol_set.reset();
+                restart++;
+            }
+            while(!sol_set.change_sol());
+            iter++;
+        }
+
+        cout << "Best Cost/Time-Sol:";
+        cout << " Tiempo: " << r_best.time;
+        cout << " Costo: " << r_best.cost;
+        cout << " Demanda: " << r_best.demand;
+        cout << " FO: " << best_fo;
+        cout << endl;
 
 
         //HC
+/*        
         int iter = 0, restart = 0;
 
         double current_time;
@@ -130,7 +182,7 @@ int main (int argc, char **argv)
 
             current_cost = sol_set.evaluate_cost(m_tt);
             current_time = (double) sol_set.evaluate_time(m_tt, m_td);
-            current_demand = sol_set.evaluate_demand(m_td);
+            current_demand = sol_set.evaluate_demand(m_tt, m_td);
 
             if (current_cost < r_cost.cost){
                 best_osol = current_cost;
@@ -182,7 +234,7 @@ int main (int argc, char **argv)
                 //best_osol = 1000000;
                 //best_tsol = 1000000;
             }
-            sol_set.change_sol();
+            while(!sol_set.change_sol());
             iter++;
         }
 
@@ -203,9 +255,15 @@ int main (int argc, char **argv)
         cout << " Costo: " << r_demand.cost;
         cout << " Demanda: " << r_demand.demand;
         cout << endl;
-
+*/
 
     return 0;
 }
 
 
+long eval(long ttime, long cost, long demand){
+
+    //return (P_TIME*ttime + cost*P_COST + 10000000000*P_DEMAND*(1/demand));
+    return ttime*cost*(1000/demand);
+
+}
