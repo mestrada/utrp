@@ -92,11 +92,11 @@ int main (int argc, char **argv)
         sol_set.print_fact_routes();
         sol_set.print();
         cout << "Valores del conjunto total";
-        cout << "Eval total time: " << sol_set.evaluate_time(m_tt) << endl;
+        cout << "Eval total time: " << sol_set.evaluate_time(m_tt, m_td) << endl;
         cout << "Eval total one-way demand: " << sol_set.evaluate_demand(m_td) << endl;
         cout << "N rutas en solución actual: " << sol_set.evaluate_cost(m_tt) << endl;
 
-/*
+
         //HC
         int iter = 0, restart = 0;
 
@@ -129,7 +129,7 @@ int main (int argc, char **argv)
         while(iter < N_ITER && restart < N_RESTART){
 
             current_cost = sol_set.evaluate_cost(m_tt);
-            current_time = sol_set.evaluate_time(m_tt);
+            current_time = (double) sol_set.evaluate_time(m_tt, m_td);
             current_demand = sol_set.evaluate_demand(m_td);
 
             if (current_cost < r_cost.cost){
@@ -204,7 +204,7 @@ int main (int argc, char **argv)
         cout << " Demanda: " << r_demand.demand;
         cout << endl;
 
-*/
+
     return 0;
 }
 

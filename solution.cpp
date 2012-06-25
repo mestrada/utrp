@@ -85,6 +85,9 @@ void solution::generate_solution(int **m_tt){
         //break;
     }
 
+    for(int i=0; i<last_index; i++)
+        sol.push_back(i);
+
 }
 
 void solution::find_top_demand_nodes(int tam, int **td){
@@ -204,6 +207,27 @@ int solution::evaluate_time(int **tt){
     return  total_time;
 }
 
+long solution::evaluate_time(int **tt, int **td){
+    int total_demand = 0;
+    long ptd = 0;
+    for(int i=0; i<n_nodes; i++){
+        //if(!is_in(i))
+            //continue;
+
+        for(int j=0; j<=i; j++){
+            if(td[i][j] <= 0)
+                continue;
+            total_demand += td[i][j];
+            cout << "i,j " << i << ", " << j << endl;
+            cout << "DDA " <<td[i][j] << endl;
+            ptd += (long)  get_shortest_time(i, j, tt)*td[i][j];
+        }
+    }
+
+
+    return (long) ptd/total_demand;
+}
+
 int solution::evaluate_demand(int **td){
     /*evaluate_demand()
 
@@ -279,4 +303,53 @@ int solution::route_lenght(int **tt, int route){
 
 int solution::get_n_routes(void){
     return sol.size();
+}
+
+int solution::get_shortest_time(int start, int end, int **tt){
+    int min_time = 999;
+    int current_time = 999;
+
+    for(int i=0; i<n_routes; i++){
+        cout << "AAAA" << endl;
+        if(!is_in(i))
+            continue;
+        if(sol_m[end][i] >= 0){
+            if(sol_m[start][i] >=0){
+                current_time = get_time(start, end, i, tt);
+                cout << "CT " << current_time << endl;
+                if(current_time < 0){
+                    current_time = get_time(end, start, i, tt);
+                    cout << "CT " << current_time << endl;
+                }
+                if(current_time < 0)
+                    cout << "ERROORRRRRRRRR no encuentra conexión entre 2 puntos" << endl;
+            }
+
+            if(current_time < min_time){
+                min_time = current_time;
+            }
+        }
+    }
+    return min_time;
+}
+
+
+
+int solution::get_time(int i, int j, int route, int **tt){
+    if(i!=j && sol_m[j][route] != j){
+        cout << "HOLAA " << endl;
+        return tt[j][sol_m[j][route]] + get_time(i, sol_m[j][route], route, tt );
+    }
+    else{
+        if(i == j)
+        {
+            cout << "CHAO"  << endl;
+            return 0;
+        }
+        if(sol_m[j][route] == j){
+            cout << "SOVLE" << endl;
+            return -1000000;
+        }
+    }
+
 }

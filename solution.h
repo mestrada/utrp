@@ -21,12 +21,15 @@ class solution
         bool is_in(int);
         std::vector<int> get_current_sol(void);
         int evaluate_time(int **);
+        long evaluate_time(int **, int **);
         int evaluate_demand(int **);
         int evaluate_cost(int**);
         bool change_sol(void);
         void reset(void);
         int route_lenght(int**, int);
         int get_n_routes(void);
+        int get_shortest_time(int, int, int **);
+        int get_time(int, int, int, int **);
 
     private:
         int **sol_m; 
