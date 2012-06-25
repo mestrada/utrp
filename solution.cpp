@@ -14,6 +14,7 @@ solution::solution(){
 
 solution::solution(int sizeX, int sizeY):n_nodes(sizeX), n_routes(sizeY){
 
+    last_index = 0;
     sol_m = new int*[n_nodes];
 
         for(int i=0; i<n_nodes; i++){
@@ -75,9 +76,13 @@ void solution::generate_solution(int **m_tt){
         G.read(m_tt);
         G.set_source(top_demand_nodes[index]);
         G.dijkstra();
+
         //G.print_deb();
         G.output();
+        last_index = G.fill_set(sol_m, last_index, n_routes);
+        //G.print_sol();
         //G.~Graph();
+        //break;
     }
 
 }

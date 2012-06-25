@@ -15,7 +15,7 @@ using namespace std;
 
 
 #define N_NODES 15
-#define N_ROUTES 30
+#define N_ROUTES 45
 #define PENALTY_RATE 2
 #define MIN_ROUTES 5
 #define N_TOP_DEMAND_NODES 3

@@ -6,6 +6,7 @@ Graph::Graph(){}
 
 Graph::Graph(int n):numOfVertices(n){
 
+    short_routes = new list<int>[numOfVertices];
     adjMatrix = new int*[numOfVertices];
         for(int i=0; i<numOfVertices; i++){
             adjMatrix[i] = new int[numOfVertices];
@@ -28,6 +29,7 @@ Graph::~Graph(){
     delete [] predecessor;
     delete [] distance;
     delete [] mark;
+    delete [] short_routes;
 
 }
 
@@ -89,15 +91,19 @@ void Graph::dijkstra()
     }
 }
 
-void Graph::printPath(int node)
+void Graph::printPath(int node, int parent)
 {
-    if(node == source)
+    if(node == source){
         cout<<node+1<<"..";
+        insert_node(parent, node);
+    }
     else if(predecessor[node] == -1)
         cout<<"No path from "<<source<<"to "<<node<<endl;
+    //TODO: Clean Route
         else {
-            printPath(predecessor[node]);
+            printPath(predecessor[node], parent);
             cout<<node+1<<"..";
+            insert_node(parent, node);
         }
 }
 
@@ -107,10 +113,15 @@ void Graph::output()
         if(i == source)
             cout<<source+1<<".."<<source+1;
         else
-            printPath(i);
+            printPath(i, i);
 
         cout<<"->"<<distance[i]<<endl;
     }
+}
+
+void Graph::insert_node(int index, int node){
+    short_routes[index].push_front(node);
+    //cout << "Index: " << index << " node: " << node << endl;
 }
 
 
@@ -120,6 +131,36 @@ void Graph::print_deb(){
         cout << "distance " << i << ": " << distance[i] << endl;
         cout << "mark " << i << ": " << mark[i] << endl;
     }
+}
+
+int Graph::fill_set(int **sol, int l_ind, int max_set_routes){
+    list<int>::iterator it; 
+    int last = l_ind;
+    int prev_node;
+    for(int i=0; i<numOfVertices; i++){
+        if(last >= max_set_routes)
+            break;
+        prev_node = 0;
+        for(it = short_routes[i].begin(); it !=short_routes[i].end(); it++){
+            sol[*it][last] = prev_node;
+            prev_node = *it;
+        }
+        //cout << "LAST " << last << endl;
+        last++;
+    }
+    return last;
+}
+
+void Graph::print_sol(){
+    list<int>::iterator it; 
+    cout << "SOL " << endl;
+    for(int i=0; i<numOfVertices; i++){
+        cout << "Sol " << i << endl;
+        for(it = short_routes[i].begin(); it !=short_routes[i].end(); it++){
+            cout << " " << *it << endl;
+        }
+    }
+
 }
 /*
 int main()

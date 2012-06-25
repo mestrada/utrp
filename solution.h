@@ -36,7 +36,7 @@ class solution
         int *top_demand_nodes;
         int *top_demand;
         int top_tam;
-        int last_index = 0;
+        int last_index;
 
         //vector<coord> camino;
         //vector<coord> solution;
