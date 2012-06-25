@@ -1,6 +1,7 @@
 //#include "mapa.h"
 #include "matrices.h"
 #include "solution.h"
+#include "Graph.h"
 
 #include <iostream>
 #include <vector>
@@ -94,6 +95,13 @@ int main (int argc, char **argv)
         cout << "N rutas en solución actual: " << sol_set.evaluate_cost(m_tt) << endl;
 
 
+        Graph G(N_NODES);
+        G.read(m_tt);
+        G.set_source(1);
+        G.dijkstra();
+        G.output();
+
+/*
         //HC
         int iter = 0, restart = 0;
 
@@ -201,7 +209,7 @@ int main (int argc, char **argv)
         cout << " Demanda: " << r_demand.demand;
         cout << endl;
 
-
+*/
     return 0;
 }
 
