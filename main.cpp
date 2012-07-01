@@ -11,14 +11,15 @@
 #include <sstream>
 #include <string>
 
+
 using namespace std;
 
 
-#define N_NODES 15
-#define N_ROUTES 45
+#define N_NODES 50
+#define N_ROUTES 75
 #define PENALTY_RATE 2
-#define MIN_ROUTES 5
-#define N_TOP_DEMAND_NODES 3
+#define MIN_ROUTES 10
+#define N_TOP_DEMAND_NODES 5
 
 #define P_TIME 0.3
 #define P_COST 0.2
@@ -80,8 +81,23 @@ int main (int argc, char **argv)
         int **m_td, **m_tt;
 
         matrices input(N_NODES);
+
+        stringstream sstd, sstt;
+        //sstd << "./input/"<< f1;
+        //sstt << "./input/" << f2;
+        //string ftd, ftt;
+        //ftd = sstd.str();
+        //ftt = sstt.str();
+
+        //char *td, *tt;
+
+        //td = new char[ftd.length()+1];
+        //tt = new char[ftt.length() + 1];
+
+        //strcpy(td, f1);
+        //strcpy(tt, f2);
         
-        input.leer("./input/td1.txt","./input/tt1.txt");
+        input.leer(&f1[0], &f2[0]);
       
         solution sol_set(N_NODES, N_ROUTES);
 
@@ -124,7 +140,7 @@ int main (int argc, char **argv)
             current_demand = sol_set.evaluate_demand(m_tt, m_td);
             current_fo = eval(current_time, current_cost, current_demand);
             
-            if(current_fo < best_fo  && best_fo != 0){
+            if(current_fo < best_fo  && current_fo != 0){
                 best_fo = current_fo;
 
                 r_best.time = current_time;
@@ -263,7 +279,7 @@ int main (int argc, char **argv)
 
 long eval(long ttime, long cost, long demand){
 
-    //return (P_TIME*ttime + cost*P_COST + 10000000000*P_DEMAND*(1/demand));
-    return ttime*cost*(1000/demand);
+    return (P_TIME*ttime + cost*P_COST + 1000*P_DEMAND*(1/demand));
+    //return ttime*cost*(1/demand);
 
 }

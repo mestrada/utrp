@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ matrices::~matrices() {
 }
 
 
-void matrices::leer(char* arch_td, char *arch_tt){
+void matrices::leer(char *arch_td, char *arch_tt){
     ifstream data;
     data.open(arch_td);
     matriz1 = (int**)malloc(n_nodes*sizeof(int*));

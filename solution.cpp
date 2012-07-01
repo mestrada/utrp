@@ -291,7 +291,7 @@ bool solution::change_sol(void){
     vector<int>::iterator it;
     r = (double) rand() / RAND_MAX;
 
-    if(r < 0.50){
+    if(r < 0.70){
         for ( it=sol.begin() ; it < sol.end(); it++ ){
             r = (double) rand() / RAND_MAX;
 
@@ -363,14 +363,12 @@ int solution::get_shortest_time(int start, int end, int **tt){
             }
         }
     }
-   /* 
+       
     if(min_time == 999 | min_time < 0){
         //cout << "MINT" << min_time << endl;
         return 0;
     }
-    else
-        cout << "MINT " << min_time << endl;
-    */
+
     return min_time;
 }
 
