@@ -8,13 +8,17 @@
 #ifndef MATRICES_H
 #define MATRICES_H
 
+#include <string>
+
+using namespace std;
+
 class matrices {
 public:
     matrices();
     matrices(int);
     matrices(const matrices& orig);
     ~matrices();
-    void leer(char*, char*);
+    void leer(char *, char *);
     int **getMatriz1();
     int **getMatriz2();
     //virtual ~matrices();
