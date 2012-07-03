@@ -6,6 +6,8 @@
 
 #define length(a) ( sizeof ( a ) / sizeof ( *a ) )
 
+#define MIN_NODE 5
+
 using namespace std;
 
 solution::solution(){ 
@@ -86,9 +88,22 @@ void solution::generate_solution(int **m_tt){
     }
 
     for(int i=0; i<last_index; i++)
-        sol.push_back(i);
+        if(node_count(i) > MIN_NODE)
+            sol.push_back(i);
 
 }
+
+int solution::node_count(int route){
+    int route_lenght = 0;
+    for(int i=0; i<n_nodes; i++){
+        if(sol_m[i][route] >= 0){
+            route_lenght += 1;
+        }
+
+    }
+    return route_lenght;
+}
+
 
 void solution::find_top_demand_nodes(int tam, int **td){
     top_tam = tam;
@@ -108,12 +123,12 @@ void solution::find_top_demand_nodes(int tam, int **td){
             }
         }
     }
-
+    /*
     cout << "Top Demand Nodes ..." << endl;
     for(int i=0; i<tam; i++)
         cout << top_demand_nodes[i] << ", ";
     cout << endl;
-
+    */
 }
 //(int) length(top_demand_nodes)
 void solution::reorder(){
@@ -210,6 +225,7 @@ int solution::evaluate_time(int **tt){
 long solution::evaluate_time(int **tt, int **td){
     int total_demand = 0;
     long ptd = 0;
+    int st = 0;
     for(int i=0; i<n_nodes; i++){
         //if(!is_in(i))
             //continue;
@@ -217,8 +233,11 @@ long solution::evaluate_time(int **tt, int **td){
         for(int j=0; j<=i; j++){
             if(td[i][j] <= 0)
                 continue;
-            total_demand += td[i][j];
-            ptd += (long)  get_shortest_time(i, j, tt)*td[i][j];
+            st = get_shortest_time(i, j, tt);
+            if(st != 0){
+                total_demand += td[i][j];
+                ptd += (long)  st*td[i][j];
+            }
         }
     }
 
@@ -273,7 +292,7 @@ long solution::evaluate_demand(int **tt, int **td){
     }
 
 
-    return total_demand;
+    return total_demand*2;
 }
 
 
@@ -291,7 +310,7 @@ bool solution::change_sol(void){
     vector<int>::iterator it;
     r = (double) rand() / RAND_MAX;
 
-    if(r < 0.70){
+    if(r < 0.50){
         for ( it=sol.begin() ; it < sol.end(); it++ ){
             r = (double) rand() / RAND_MAX;
 

@@ -12,6 +12,7 @@ class solution
         solution(int, int);
         ~solution();
         void generate_solution(int **);
+        int node_count(int);
         void find_top_demand_nodes(int, int **);
         void reorder();
         void swap(int, int);
