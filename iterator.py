@@ -8,19 +8,19 @@ import subprocess
 
 
 SEED = 12803
-ITER = " 1000"
-N_ROUTES = " 15"
-N_RESTART = " 30"
+ITER = " 10000"
+N_ROUTES = " 50"
+N_RESTART = " 500"
 VECIND = " 30"
-N = 30
+N = 2
 
 
 def main():
 
-    f = open('./sol/output.txt', 'w+')
+    f = open('./sol/output5.txt', 'w+')
 
     for i in xrange(1, N):        
-        process = Popen(["./urtp", "td1.txt", "tt1.txt", N_ROUTES, ITER, N_RESTART, VECIND, " " + str(SEED*i) ],
+        process = Popen(["./urtp", "td2.txt", "tt2.txt", N_ROUTES, ITER, N_RESTART, VECIND, " " + str(SEED*i) ],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print SEED*i
         
