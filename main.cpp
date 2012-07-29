@@ -24,6 +24,7 @@ using namespace std;
 #define P_TIME 0.3
 #define P_COST 0.2
 #define P_DEMAND 0.5
+#define CREATE_PROB 0.6
 
 int N_ITER;
 //int N_ROUTES;
@@ -31,6 +32,8 @@ int N_RESTART;
 unsigned SEED;
 int N_NODES;
 int TRESHOLD;
+int aff_set_size = 5;
+int POBLACION;
 //TODO: pasar por parámetros.
 
 typedef struct cont
@@ -43,7 +46,7 @@ typedef struct cont
 
 /*
 valgrind -v --tool=memcheck --leak-check=full ./urtp
-Parámetros:  instancia_tiempo instanciat_demanda N_NODES N_ITER N_RESTART VECINDARIO SEMILLA
+Parámetros:  instancia_tiempo instanciat_demanda N_NODES N_ITER N_RESTART POBLACION SEMILLA
 Ejemplo:  td1.txt tt1.txt 15 1000 20 30 1234567890
 */
 
@@ -68,6 +71,7 @@ int main (int argc, char **argv)
         N_NODES = atoi(argv[3]);
         N_ITER = atoi(argv[4]);
         N_RESTART = atoi(argv[5]);
+        POBLACION = atoi(argv[6]);
         SEED = (unsigned) atoi(argv[7]);
         TRESHOLD = (int) (N_NODES / 4);
 
@@ -88,20 +92,24 @@ int main (int argc, char **argv)
         
         input.leer(&f1[0], &f2[0]);
       
-        solution sol_set(N_NODES, N_ROUTES);
+        solution sol_set(N_NODES, N_ROUTES, POBLACION);
 
 		//cout << "\n<<<<<<Urban Routing Transit Problem >>>>>\n";
 		//cout << "Inicializando soluciones\n";
 		
         m_td = input.getMatriz1();
         m_tt = input.getMatriz2();
-        //input.print();
+        input.print();
 
         sol_set.find_top_demand_nodes(N_TOP_DEMAND_NODES, m_td);
-        sol_set.generate_solution(m_tt);      
+        //sol_set.generate_solution(m_tt);      
+        sol_set.generate_solution(m_tt, CREATE_PROB);     
+        sol_set.generate_antigens(0.05);
+        sol_set.print_antigens(); 
 
-        //sol_set.print_fact_routes();
-        //sol_set.print();
+        sol_set.print_fact_routes();
+        cout << "--------------------0--------------------\n";
+        sol_set.print();
         //cout << "Valores del conjunto total" << endl;
         //cout << "Eval total time: " << sol_set.evaluate_time(m_tt, m_td) << endl;
         //cout << "Eval total one-way demand: " << sol_set.evaluate_demand(m_tt, m_td) << endl;
@@ -109,6 +117,53 @@ int main (int argc, char **argv)
         //cout << "FO: " << eval( sol_set.evaluate_time(m_tt, m_td), sol_set.evaluate_cost(m_tt), 
          //   sol_set.evaluate_demand(m_tt, m_td) ) << endl;
 
+        bool criteria = true;
+
+        long current_time;
+        long current_demand = 0;
+        long current_cost;
+
+        result r_best;
+        r_best = {1000000, 1000000, 0};
+
+        long best_fo = 9999999;
+
+        long current_fo;
+
+        int iter = 0, restart = 0;
+        int t_routes = 0;
+
+        sol_set.clonal_selection();
+
+        while(iter < N_ITER && criteria){
+            
+
+            iter++;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
         cout << "START," << eval( sol_set.evaluate_time(m_tt, m_td), sol_set.evaluate_cost(m_tt), 
          sol_set.evaluate_demand(m_tt, m_td) ) << "," << sol_set.get_n_routes() << endl;
 
@@ -147,18 +202,6 @@ int main (int argc, char **argv)
                 restart++;
             }
             
-            /*
-            double r;
-            
-            if(sol_set.get_n_routes() < TRESHOLD){
-                r = (double) rand() / RAND_MAX;
-                while(!sol_set.change_sol(r + 0.2));
-            }
-            else{
-                r = (double) rand() / RAND_MAX;
-                while(!sol_set.change_sol(r));
-            }
-            */
             while(!sol_set.change_sol());
             iter++;
         }
@@ -173,13 +216,15 @@ int main (int argc, char **argv)
 
         cout << "FINISH," << best_fo << "," << t_routes << endl;
 
-    return 0;
+    return 0;**/
 }
 
 
 long eval(long ttime, long cost, long demand){
-
-    return (long) (100*ttime + 10*cost + 1000*(1/(demand)) )/3;
+    if (demand !=0)
+        return (long) (100*ttime + 10*cost + 1000*(1/(demand)) )/3;
+    else
+        return 9999999;
     //return ttime*cost*(1/demand);
 
 }
