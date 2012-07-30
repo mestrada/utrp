@@ -12,12 +12,18 @@ typedef struct pair
 }antigen;
 
 
+typedef struct mut_pair{
+        int ind;
+        int ite;
+}mut;
+
+
 class solution
 {
     public:
         
         solution();
-        solution(int, int, int);
+        solution(int, int, int, int);
         ~solution();
         void generate_solution(int **);
         void generate_solution(int **, double);
@@ -48,12 +54,15 @@ class solution
         double calculate_affinity(int, int, long, int);
         bool is_in_route(int, int);
         bool clonal_selection(void);
+        bool mutation_process(double);
+        bool mutate(int, int);
 
     private:
         int **sol_m; 
         int n_nodes;
         int n_routes;
         int n_pob;
+        int max_routes;
         vector<int> sol;
         vector<int> *sol_group;
         int *top_demand_nodes;

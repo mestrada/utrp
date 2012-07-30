@@ -19,12 +19,14 @@ using namespace std;
 #define N_ROUTES 75
 #define PENALTY_RATE 2
 #define MIN_ROUTES 3
-#define N_TOP_DEMAND_NODES 5
+#define N_TOP_DEMAND_NODES 14
+#define N_MAX_ROUTES 5
 
 #define P_TIME 0.3
 #define P_COST 0.2
 #define P_DEMAND 0.5
 #define CREATE_PROB 0.6
+#define M_PROB 0.01
 
 int N_ITER;
 //int N_ROUTES;
@@ -92,7 +94,7 @@ int main (int argc, char **argv)
         
         input.leer(&f1[0], &f2[0]);
       
-        solution sol_set(N_NODES, N_ROUTES, POBLACION);
+        solution sol_set(N_NODES, N_ROUTES, POBLACION, N_MAX_ROUTES);
 
 		//cout << "\n<<<<<<Urban Routing Transit Problem >>>>>\n";
 		//cout << "Inicializando soluciones\n";
@@ -133,17 +135,15 @@ int main (int argc, char **argv)
         int iter = 0, restart = 0;
         int t_routes = 0;
 
-        sol_set.clonal_selection();
-
+        
+        cout << "Clonal Selection and mutation Alghotrithm " << endl;
         while(iter < N_ITER && criteria){
-            
+
+            sol_set.clonal_selection();
+            sol_set.mutation_process(M_PROB);
 
             iter++;
         }
-
-
-
-
 
 
 
@@ -217,6 +217,8 @@ int main (int argc, char **argv)
         cout << "FINISH," << best_fo << "," << t_routes << endl;
 
     return 0;**/
+
+    cout << "AAAAAAAAAAAAAAAAAAAAA" << endl;
 }
 
 

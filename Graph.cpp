@@ -133,11 +133,13 @@ void Graph::print_deb(){
     }
 }
 
-int Graph::fill_set(int **sol, int l_ind, int max_set_routes){
+int Graph::fill_set(int **sol, int l_ind, int max_set_routes, int max_routes){
     list<int>::iterator it; 
     int last = l_ind;
     int prev_node;
     for(int i=0; i<numOfVertices; i++){
+        if(short_routes[i].size() < max_routes)
+            continue;
         if(last >= max_set_routes)
             break;
         prev_node = 0;

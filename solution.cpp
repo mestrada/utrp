@@ -14,7 +14,8 @@ solution::solution(){
 }
 
 
-solution::solution(int sizeX, int sizeY, int pob):n_nodes(sizeX), n_routes(sizeY), n_pob(pob){
+solution::solution(int sizeX, int sizeY, int pob, int max):n_nodes(sizeX), n_routes(sizeY), n_pob(pob),
+max_routes(max){
 
     last_index = 0;
     sol_m = new int*[n_nodes];
@@ -52,7 +53,7 @@ void solution::generate_solution(int **m_tt){
 
         //G.print_deb();
         G.output();
-        last_index = G.fill_set(sol_m, last_index, n_routes);
+        last_index = G.fill_set(sol_m, last_index, n_routes, 3);
         //G.print_sol();
         //G.~Graph();
         //break;
@@ -61,6 +62,43 @@ void solution::generate_solution(int **m_tt){
     for(int i=0; i<last_index; i++)
         if(node_count(i) > MIN_NODE)
             sol.push_back(i);
+
+}
+
+void solution::generate_solution(int **m_tt, double prob){
+    double r;
+    for(int index=0; index<top_tam; index++){
+        if(last_index >= n_routes)
+            break;
+        Graph G(n_nodes);
+        G.read(m_tt);
+        G.set_source(top_demand_nodes[index]);
+        G.dijkstra();
+
+        //G.print_deb();
+        G.output();
+        last_index = G.fill_set(sol_m, last_index, n_routes, max_routes);
+        //G.print_sol();
+        //G.~Graph();
+        //break;
+    }
+
+    int current_routes;
+
+    for(int i=0; i<n_pob; i++){
+        current_routes = 0;
+        for(int j=0; j<last_index; j++){
+            r = (double) rand() / RAND_MAX;
+            if(r < prob)
+                if(node_count(j) > MIN_NODE){
+                    sol_group[i].push_back(j);
+                    current_routes++;
+                }
+            if( current_routes >= max_routes)
+                    break;
+        }
+        
+    }
 
 }
 
@@ -100,34 +138,6 @@ void solution::print_antigens(){
         c++;
     }
     cout << " TOTAL: " << c << endl;
-
-}
-
-
-void solution::generate_solution(int **m_tt, double prob){
-    double r;
-    for(int index=0; index<top_tam; index++){
-        Graph G(n_nodes);
-        G.read(m_tt);
-        G.set_source(top_demand_nodes[index]);
-        G.dijkstra();
-
-        //G.print_deb();
-        G.output();
-        last_index = G.fill_set(sol_m, last_index, n_routes);
-        //G.print_sol();
-        //G.~Graph();
-        //break;
-    }
-
-    for(int i=0; i<n_pob; i++){
-        for(int j=0; j<last_index; j++){
-            r = (double) rand() / RAND_MAX;
-            if(r < prob)
-                if(node_count(j) > MIN_NODE)
-                    sol_group[i].push_back(j);
-        }
-    }
 
 }
 
@@ -311,36 +321,6 @@ long solution::evaluate_time(int **tt, int **td){
 }
 
 long solution::evaluate_demand(int **tt, int **td){
-    /*evaluate_demand()
-
-        Retorna la evaluación respecto a la demanda satisfecha
-
-        input: demand matrix table.}
-
-        returns: double: sum of alls satisfied demands.
-    */
-/*        
-    int total_demand = 0;
-    double route_demand = 0;
-    //cout << "One-Way Demand by route" << endl;
-    for(int j=0; j<n_routes; j++){
-        //route_demand = 0;
-        if(is_in(j)){
-            for(int i=0; i<n_nodes; i++){
-                for(int k=0; k<n_nodes; k++){
-                    if(i==k)
-                        continue;
-                    else{
-                        total_demand +=  sol_m[k][j] >= 0 && sol_m[k][j] == i ?  td[k][i] : 0; 
-                        //route_demand +=  sol_m[k][j] >= 0 && sol_m[k][j] == i ?  td[k][i] : 0; 
-                    }
-                }
-            }
-            //cout << "Covered Demand for route " << j << ": " << route_demand << endl;
-        }   
-    }
-    return  total_demand;
-    */
     int current_time;
     long total_demand = 0;
     for(int k=0; k<n_pob; k++){
@@ -546,18 +526,106 @@ double solution::calculate_affinity(int x, int y, long dda, int route){
 bool solution::clonal_selection(){
     vector<antigen>::iterator it;   
     vector<int>::iterator it2;
-    cout << "Clonal Selection Alghotrithm " << endl;
     int c = 0;
     for(it=antigens.begin(); it<antigens.end(); it++){
-        cout << "Affinity A" << c << endl;
+        //cout << "Affinity A" << c << endl;
         for( int i=0; i < n_pob; i++){
+            // For each solution calculate the affinity.
             for ( it2=sol_group[i].begin() ; it2 < sol_group[i].end(); it2++ ){
-                cout << calculate_affinity(it->start, it->end, 1234, *it2 ) << " | ";
+            //    cout << calculate_affinity(it->start, it->end, 1234, *it2 ) << " | ";
             }
     }
     c++;
-    cout << endl;
+    //cout << endl;
 
     }
+    return true;
+}
+
+bool solution::mutation_process(double m_prob){
+    double r;
+    int counter;
+    vector<int>::iterator it;
+    std::vector<mut>::iterator it2;
+    vector<mut> stm;
+    mut aux;
+
+    //cout << "Size of sol_group: " << sol_group->size() << endl;
+    for( int i=0; i < n_pob; i++){
+        counter = 0;
+        for ( it=sol_group[i].begin() ; it < sol_group[i].end(); it++ ){
+            //cout  << *it << ", " << counter << " | " ;
+
+            r = (double) rand() / RAND_MAX;
+            if (r < m_prob){
+                aux.ind = i;
+                aux.ite= counter;
+                stm.push_back(aux);
+            }
+            counter++;
+        }
+    }
+
+    for ( it2=stm.begin(); it2 < stm.end(); it2++ ){
+        mutate(it2->ind, it2->ite);
+    }
+
+}
+
+bool solution::mutate(int ind, int pos){
+    double r;
+    vector<int>::iterator it;
+    int op;
+    int route;
+    r = (int) (rand()%11);
+
+    /*  3 ways of mutation:
+            Add new route
+            Delete an existent route
+            Change an existent route
+    */
+
+    if(r<3)
+        op = 0;
+    else
+        if(r<6)
+            op = 1;
+        else
+            op = 2;
+       
+    switch(op){
+        case 0:
+            route = rand()%last_index;
+            //cout << endl << "CASE 0 add";
+            //cout << "ind, pos: " << ind << ", " << pos ;
+            if(!is_in(route, ind))
+                sol_group[ind].push_back(route);
+            else
+                return false;
+            break;
+        case 1:
+            if(sol_group[ind].empty())
+                return false;
+            //sol_group[ind].erase( pos);
+            sol_group[ind].pop_back();
+            //cout << endl << "CASE 1 delete";
+            break;
+        case 2:
+            route = rand()%last_index;
+            if(sol_group[ind].empty() && pos >= sol_group[ind].size())
+                return false;
+
+            if(!is_in(route, ind)){
+                //sol_group[ind].erase(sol_group[ind].begin() +pos);
+                (sol_group[ind]).at(pos)= route;
+                //cout << endl << "CASE 2 change";
+                //sol_group[ind].push_back(route);
+                return true;
+            }
+            return false;
+            break;
+
+    }
+
     return true;
 }
