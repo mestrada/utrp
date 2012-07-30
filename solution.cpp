@@ -558,18 +558,21 @@ bool solution::mutation_process(double m_prob){
 
             r = (double) rand() / RAND_MAX;
             if (r < m_prob){
+                /*
                 aux.ind = i;
                 aux.ite= counter;
-                stm.push_back(aux);
+                stm.push_back(aux);*/
+                mutate(i, counter);
+                break;
             }
             counter++;
         }
     }
-
+/*
     for ( it2=stm.begin(); it2 < stm.end(); it2++ ){
         mutate(it2->ind, it2->ite);
     }
-
+*/
 }
 
 bool solution::mutate(int ind, int pos){
