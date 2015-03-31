@@ -8,8 +8,8 @@
 #include <string>
 
 #include "matrix.h"
-/*
 #include "solution.h"
+/*
 #include "Graph.h"
 */
 
@@ -81,4 +81,61 @@ int main (int argc, char **argv)
     demand_matrix.print();
     time_matrix.print();
 
+    solution sol (population, number_routes, n_nodes, seed);
+
+    sol.print();
+
+    // Solution = Set of N routes
+
+    /*  Q = set of solutions
+        Ab = Antibodies (Worst solutions)
+        Ag = Antigens (Best solutions)
+        P = Pool of solutions to temporary store clones
+    */
+
+    // Steps MOAIS-HV Pierrard & Coello
+
+    //  1.- Initialize population
+    //      1a. Generate random individuals to fill Q
+    //      1b. Store the best individuals in Ag
+    //      1c. Instantiate empty Ab solution set.
+    //      1d. Instantiate empty P set.
+
+
+
+
+    //  2.- Evaluate population individuals in Q
+    //      2a. Feasibility and objectives values.
+    //      2b. Non-dominated based ranking.
+
+    //  3.- Split the population Q into Ag and Ab
+    //      3a. Antigens: feasible and non-dominated.
+    /*      3b. Antibodies:
+                infeasible and non-dominated
+                feasible and dominated
+                infeasible and dominated
+    */
+
+    //      3b. Antigens: Non-dominated            
+    //          Antibodies: dominated
+
+    //  4.- Define affinity for antigens and antibodies.
+
+    //  5.- Clonal selection
+
+    //  6.- Mutation
+
+    //  7.- Evaluate P: objectives and feasibility.
+
+    //  8.- Add antigens to P.
+
+    //  9.- Non-dominated based rank over P.
+
+    //  10.- Update population in Q.
+
+    //  11.- Fill Q with successives ranking over P.
+
+    //  12.- Split the population
+
+    //  13.- If stop criteria is not met, go to step 4.
 }

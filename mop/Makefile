@@ -1,5 +1,5 @@
 #OBJS = main.o   matrices.o solution.o Graph.o
-OBJS = main.o matrix.o
+OBJS = main.o matrix.o solution.o
 CC = g++
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
