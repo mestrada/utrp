@@ -72,6 +72,8 @@ int main (int argc, char **argv)
         return -1;
     }
 
+    srand(seed);
+
     matrix demand_matrix(n_nodes);
     demand_matrix.load(&file_path_demand_matrix[0]);
 
