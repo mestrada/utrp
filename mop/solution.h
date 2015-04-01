@@ -2,7 +2,6 @@
 #define SOLUTION_H
 
 #include <vector>
-using namespace std;
 
 class solution
 {
@@ -10,7 +9,7 @@ class solution
         
         solution(int, int, int, unsigned);
         ~solution();
-        bool is_in(int, vector<int>);
+        bool is_in(int, std::vector<int>);
         void print();
     private:
         int pop_size;
@@ -18,11 +17,9 @@ class solution
         int nodes;
         unsigned seed;
 
-        //int **Q;
-        //vector<int> *Q;
         std::vector< std::vector<int> > Q;
-        int **Ag;
-        int **Ab;
-        int **P;
+        std::vector< std::vector<int> > Ab;
+        std::vector< std::vector<int> > Ag;
+        std::vector< std::vector<int> > P;
 };
 #endif

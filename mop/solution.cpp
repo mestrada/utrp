@@ -21,17 +21,17 @@ routes(n_routes), nodes(n_nodes), seed(seed){
         P = Pool of solutions to temporary store clones
     */
 
-    Q = std::vector< std::vector<int> >(pop_size, std::vector<int>(routes));
-    Ab = new int*[pop_size]; // Ab Antibodies set
-    Ag = new int*[pop_size]; // Ag Antigens set
-    P = new int*[2*pop_size]; // P pool of clones
-
-    for(int i=0; i<pop_size; i++){
-        //Q[i] = new int[routes];
-        //Q[i] = new vector<int>[routes];
-        Ab[i] = new int[routes];
-        Ag[i] = new int[routes];
-    }
+    Q = std::vector< std::vector<int> >
+        (pop_size, std::vector<int>(routes));
+    // Ab Antibodies set
+    Ab = std::vector< std::vector<int> >
+        (pop_size, std::vector<int>(routes));
+    // Ag Antigens set
+    Ag = std::vector< std::vector<int> >
+        (pop_size, std::vector<int>(routes));
+    // P pool of clones
+    P = std::vector< std::vector<int> >
+        (2*pop_size, std::vector<int>(routes));
 
     // Steps MOAIS-HV Pierrard & Coello
 
@@ -44,7 +44,7 @@ routes(n_routes), nodes(n_nodes), seed(seed){
 
         for(std::vector<int>::iterator jt=(*it).begin(); jt != (*it).end(); ++jt){
 
-            rand_route = (int) (rand() % pop_size);
+            rand_route = (int) (rand() % nodes);
 
             // Constraint: No loops and no repetitions        
             if((*it).empty()){
@@ -62,15 +62,11 @@ routes(n_routes), nodes(n_nodes), seed(seed){
 }
 
 solution::~solution(){
-    for (int i=0; i<pop_size; i++){
-        //delete [] Q[i];
-        delete [] Ab[i];
-        delete [] Ag[i];
-    }
 
-    //delete [] Q;
-    delete [] Ab;
-    delete [] Ag;
+    Q.clear();
+    Ab.clear();
+    Ag.clear();
+    P.clear();
 }
 
 bool solution::is_in(int node, std::vector<int> sol){
