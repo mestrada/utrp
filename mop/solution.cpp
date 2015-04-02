@@ -6,6 +6,8 @@
 #include "solution.h"
 #include "matrix.h"
 
+#define EMPTY -1
+
 
 solution::solution(int population, int n_routes, int n_nodes, unsigned seed): pop_size(population),
 routes(n_routes), nodes(n_nodes), seed(seed){
@@ -21,16 +23,16 @@ routes(n_routes), nodes(n_nodes), seed(seed){
     */
 
     Q = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes));
+        (pop_size, std::vector<int>(routes, EMPTY));
     // Ab Antibodies set
     Ab = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes));
+        (pop_size, std::vector<int>(routes, EMPTY));
     // Ag Antigens set
     Ag = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes));
+        (pop_size, std::vector<int>(routes, EMPTY));
     // P pool of clones
     P = std::vector< std::vector<int> >
-        (2*pop_size, std::vector<int>(routes));
+        (2*pop_size, std::vector<int>(routes, EMPTY));
 
     // Steps MOAIS-HV Pierrard & Coello
 
@@ -38,6 +40,7 @@ routes(n_routes), nodes(n_nodes), seed(seed){
     //      1a. Generate random individuals to fill Q
 
     std::cout << "Generate random individuals to fill Q" << std::endl;
+    
 
     for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
 
@@ -50,14 +53,15 @@ routes(n_routes), nodes(n_nodes), seed(seed){
                 *jt = rand_route;
             }
             else{
-                if(!is_in(rand_route, *it))
+                if(!is_in(rand_route, *it)){
                     *jt = rand_route;
+                }
+                else{
+                    --jt;
+                }
             }
         }
     }
-
-    //      1b. Store the best individuals in Ag
-
 }
 
 solution::~solution(){
@@ -85,7 +89,7 @@ void solution::print(){
 
     for(int i=0; i<pop_size; i++){
         for(int j=0; j<routes; j++){
-            std::cout << Q[i][j] << " ";
+            std::cout << Q[i][j] << "\t";
         }
         std::cout << std::endl;
     }
@@ -97,4 +101,31 @@ void solution::setDemandMatrix(int** dmatrix){
 
 void solution::setTimeMatrix(int** tmatrix){
     time_matrix = tmatrix;
+}
+
+void solution::calculate(void){
+    //      1b. Store the best individuals in Ag
+
+    Ag = Q;
+
+    for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
+
+        if(is_feasible(&(*it))) {
+
+        }
+    }
+}
+
+bool solution::is_feasible(std::vector<int>* s){
+
+    for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
+        if(it != (s->end() -1)){
+            if (time_matrix[*it][*(it + 1)] < 0){
+                /*std::cout << "Not feasible" << std::endl;*/
+                return false;
+            }
+        }
+    }
+    /*std::cout << "Feasible" << std::endl;*/
+    return true;
 }

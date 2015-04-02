@@ -89,7 +89,9 @@ int main (int argc, char **argv)
 
     sol.setDemandMatrix(demand_matrix.getMatrix());
 
-    sol.setTimeMatrix(time_matrix.getMatrix());    
+    sol.setTimeMatrix(time_matrix.getMatrix());
+
+    sol.calculate();
 
     // Solution = Set of N routes
 

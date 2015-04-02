@@ -15,6 +15,7 @@ class solution
         void print();
         void setDemandMatrix(int **);
         void setTimeMatrix(int **);
+        void calculate(void);
     private:
         int pop_size;
         int routes;
@@ -28,5 +29,7 @@ class solution
 
         int** demand_matrix;
         int** time_matrix;
+
+        bool is_feasible(std::vector<int>*);
 };
 #endif
