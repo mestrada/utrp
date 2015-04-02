@@ -1,12 +1,11 @@
-#include "solution.h"
-//#include "Graph.h"
 
 #include <iostream>
 #include <stdlib.h>
 #include <algorithm>
 
+#include "solution.h"
+#include "matrix.h"
 
-/*using namespace std;*/
 
 solution::solution(int population, int n_routes, int n_nodes, unsigned seed): pop_size(population),
 routes(n_routes), nodes(n_nodes), seed(seed){
@@ -90,4 +89,12 @@ void solution::print(){
         }
         std::cout << std::endl;
     }
+}
+
+void solution::setDemandMatrix(int** dmatrix){
+    demand_matrix = dmatrix;
+}
+
+void solution::setTimeMatrix(int** tmatrix){
+    time_matrix = tmatrix;
 }

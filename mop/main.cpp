@@ -63,7 +63,7 @@ int main (int argc, char **argv)
         std::cout << "Maximum route lenght:\t" << argv[5] << std::endl;
         std::cout << "Mutation Probability:\t" << argv[6] << std::endl;
         std::cout << "Maximum iterations:\t" << argv[7] << std::endl;
-        std::cout << "Popiulation size:\t" << argv[8] << std::endl;
+        std::cout << "Population size:\t" << argv[8] << std::endl;
         std::cout << "Seed:\t\t\t" << argv[9] << std::endl;
 
     }
@@ -86,6 +86,10 @@ int main (int argc, char **argv)
     solution sol (population, number_routes, n_nodes, seed);
 
     sol.print();
+
+    sol.setDemandMatrix(demand_matrix.getMatrix());
+
+    sol.setTimeMatrix(time_matrix.getMatrix());    
 
     // Solution = Set of N routes
 
