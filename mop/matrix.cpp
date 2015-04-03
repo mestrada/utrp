@@ -53,7 +53,7 @@ void matrix::print(){
     cout << "Matrix \n";
     for(int i=0;i<n_nodes;i++){
         for(int j=0;j<n_nodes;j++){
-            printf("\t%d", m[i][j]);
+            printf("%d\t", m[i][j]);
         }
         printf("\n");
 
