@@ -5,6 +5,10 @@
 
 #include "matrix.h"
 
+#define EMPTY -1
+#define INF 100
+
+
 class solution
 {
     public:
@@ -31,5 +35,8 @@ class solution
         int** time_matrix;
 
         bool is_feasible(std::vector<int>*);
+        double OperatorCost(std::vector<int>*);
+        double PassengerCost(std::vector<int>*);
+        void evaluateCosts(void);
 };
 #endif

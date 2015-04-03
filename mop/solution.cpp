@@ -6,8 +6,6 @@
 #include "solution.h"
 #include "matrix.h"
 
-#define EMPTY -1
-
 
 solution::solution(int population, int n_routes, int n_nodes, unsigned seed): pop_size(population),
 routes(n_routes), nodes(n_nodes), seed(seed){
@@ -114,6 +112,8 @@ void solution::calculate(void){
 
         }
     }
+
+    evaluateCosts();
 }
 
 bool solution::is_feasible(std::vector<int>* s){
@@ -128,4 +128,48 @@ bool solution::is_feasible(std::vector<int>* s){
     }
     /*std::cout << "Feasible" << std::endl;*/
     return true;
+}
+
+
+double solution::PassengerCost(std::vector<int>* s){
+
+    /*
+        
+
+    */
+
+    double fo_value = 0.0;
+}
+
+
+
+
+double solution::OperatorCost(std::vector<int>* s){
+
+    /*
+        The operator cost is the sum of the time between nodes of routes.
+    */
+
+    double fo_value;
+
+    fo_value = 0.0;
+
+    for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
+            if(it != (s->end() -1)){
+                if (time_matrix[*it][*(it + 1)] > 0){
+                    fo_value += time_matrix[*it][*(it + 1)];
+                }else{
+                    fo_value += INF;
+                }
+            }
+        }
+    std::cout << "Operator Cost: " << fo_value << std::endl;
+
+    return fo_value;
+}
+
+void solution::evaluateCosts(void){
+    for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
+        OperatorCost(&(*it));
+    }
 }
