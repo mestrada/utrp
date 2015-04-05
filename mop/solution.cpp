@@ -104,10 +104,7 @@ void solution::setTimeMatrix(int** tmatrix){
 
 void solution::calculate(void){
     //      1b. Store the best individuals in Ag
-
-    // Ag = Q;
-
-    // for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
+    Ag = Q;
 
     for(SolIter it=Q.begin(); it != Q.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
