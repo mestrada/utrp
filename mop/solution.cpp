@@ -7,8 +7,8 @@
 #include "matrix.h"
 
 
-solution::solution(int population, int n_routes, int n_nodes, unsigned seed): pop_size(population),
-routes(n_routes), nodes(n_nodes), seed(seed){
+solution::solution(int population, int n_routes, int n_nodes, unsigned seed):
+pop_size(population), routes(n_routes), nodes(n_nodes), seed(seed){
 
     int rand_route;
 
@@ -20,17 +20,16 @@ routes(n_routes), nodes(n_nodes), seed(seed){
         P = Pool of solutions to temporary store clones
     */
 
-    Q = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes, EMPTY));
+    // Q set of solutions
+    Q = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+
     // Ab Antibodies set
-    Ab = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes, EMPTY));
+    Ab = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+
     // Ag Antigens set
-    Ag = std::vector< std::vector<int> >
-        (pop_size, std::vector<int>(routes, EMPTY));
+    Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
     // P pool of clones
-    P = std::vector< std::vector<int> >
-        (2*pop_size, std::vector<int>(routes, EMPTY));
+    P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
 
     // Steps MOAIS-HV Pierrard & Coello
 
@@ -38,24 +37,23 @@ routes(n_routes), nodes(n_nodes), seed(seed){
     //      1a. Generate random individuals to fill Q
 
     std::cout << "Generate random individuals to fill Q" << std::endl;
-    
 
-    for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
 
-        for(std::vector<int>::iterator jt=(*it).begin(); jt != (*it).end(); ++jt){
-
-            rand_route = (int) (rand() % nodes);
-
-            // Constraint: No loops and no repetitions        
-            if((*it).empty()){
-                *jt = rand_route;
-            }
-            else{
-                if(!is_in(rand_route, *it)){
-                    *jt = rand_route;
+                rand_route = (int) (rand() % nodes);
+                // Constraint: No loops and no repetitions        
+                if((*jt).empty()){
+                    *kt = rand_route;
                 }
                 else{
-                    --jt;
+                    if(!is_in(rand_route, *jt)){
+                        *kt = rand_route;
+                    }
+                    else{
+                        --kt;
+                    }
                 }
             }
         }
@@ -87,7 +85,10 @@ void solution::print(){
 
     for(int i=0; i<pop_size; i++){
         for(int j=0; j<routes; j++){
-            std::cout << Q[i][j] << "\t";
+            for(int k=0; k<routes; k++){
+                std::cout << Q[i][j][k] << "\t";
+            }
+            std::cout << std::endl;
         }
         std::cout << std::endl;
     }
@@ -104,12 +105,15 @@ void solution::setTimeMatrix(int** tmatrix){
 void solution::calculate(void){
     //      1b. Store the best individuals in Ag
 
-    Ag = Q;
+    // Ag = Q;
 
-    for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
+    // for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
 
-        if(is_feasible(&(*it))) {
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            if(is_feasible(&(*jt))) {
 
+            }
         }
     }
 
@@ -139,16 +143,49 @@ double solution::PassengerCost(std::vector<int>* s){
     */
 
     double fo_value = 0.0;
+
+
+    for (int i = 0; i < nodes; ++i)
+    {
+        /* code */
+        for (int j = 0; j < nodes; ++j)
+        {
+            /* code */
+
+            // demand_matrix;
+            // time_matrix;
+
+        }
+    }
+
+    return fo_value;
 }
 
 
-
-
-double solution::OperatorCost(std::vector<int>* s){
+double solution::OperatorCost(void){
 
     /*
         The operator cost is the sum of the time between nodes of routes.
     */
+
+    double fo_cost;
+
+     fo_cost = 0.0;
+
+
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            fo_cost += RouteOperatorCost(&(*jt));
+        }
+    }
+
+    std::cout << "Total Operator Cost: " << fo_cost << std::endl;
+
+    return fo_cost;
+}
+
+
+double solution::RouteOperatorCost(std::vector<int>* s){
 
     double fo_value;
 
@@ -163,13 +200,12 @@ double solution::OperatorCost(std::vector<int>* s){
                 }
             }
         }
-    std::cout << "Operator Cost: " << fo_value << std::endl;
+    std::cout << "Route Operator Cost: " << fo_value << std::endl;
 
     return fo_value;
 }
 
 void solution::evaluateCosts(void){
-    for(std::vector< std::vector<int> >::iterator it=Q.begin(); it != Q.end(); ++it){
-        OperatorCost(&(*it));
-    }
+    
+    OperatorCost();  
 }

@@ -9,6 +9,14 @@
 #define INF 100
 
 
+typedef std::vector<int> Route;
+typedef std::vector<Route> Routes;
+typedef std::vector<Routes> Solutions;
+typedef std::vector< std::vector<std::vector<int> > >::iterator SolIter;
+typedef std::vector< std::vector<int> >::iterator RoutesIter;
+typedef std::vector<int>::iterator RouteIter;
+
+
 class solution
 {
     public:
@@ -26,16 +34,21 @@ class solution
         int nodes;
         unsigned seed;
 
-        std::vector< std::vector<int> > Q;
+
+        std::vector<std::vector<std::vector<int> > > Q;
+
+        // std::vector< std::vector<int> > Q;
         std::vector< std::vector<int> > Ab;
         std::vector< std::vector<int> > Ag;
         std::vector< std::vector<int> > P;
+
 
         int** demand_matrix;
         int** time_matrix;
 
         bool is_feasible(std::vector<int>*);
-        double OperatorCost(std::vector<int>*);
+        double OperatorCost(void);
+        double RouteOperatorCost(std::vector<int>*);
         double PassengerCost(std::vector<int>*);
         void evaluateCosts(void);
 };
