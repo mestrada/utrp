@@ -10,10 +10,14 @@ Steps
 	1.c. Initialize antigens Ag empty of fixed size n and store the best individuals found so far.
 	1.d. Initialize pool set P of size 2n. This pool is used to the clone process. 
 2.- Evaluate individuals in Q
-	2.a. Evaluate faesibility and objective values.
-		This step is performed doing a connectivity check against the time matrix. If the nodes aren't connected, so the route is infeasible, and feasible otherwise.
+	2.a. Evaluate feasibility and objective values.
+		This step is performed doing a connectivity check against the time matrix. If the nodes are not connected the route is infeasible, and feasible otherwise.
 	2.b. Perform a fast non-dominant ranking.
-3.- Split popilation Q in two sets.
+		In this step each objective function fg is applied over each individual.
+			The operator cost is the sum of the time between nodes according to the given route.
+
+			 
+3.- Split population Q in two sets.
 	3.a. Antigens will be the feasible and non-dominated individuals.
 	3.b. Antibodies will be the non-feasible and non-dominated individuals, the feasible and dominated individuals and the unfeasible and dominated individuals.
 4.- Define affinities of Antibodies and Antigens
