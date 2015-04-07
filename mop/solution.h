@@ -35,12 +35,10 @@ class solution
         unsigned seed;
 
 
-        std::vector<std::vector<std::vector<int> > > Q;
-
-        // std::vector< std::vector<int> > Q;
-        std::vector< std::vector<int> > Ab;
-        std::vector< std::vector<int> > Ag;
-        std::vector< std::vector<int> > P;
+        Solutions Q;
+        Solutions Ab;
+        Solutions Ag;
+        Solutions P;
 
 
         int** demand_matrix;

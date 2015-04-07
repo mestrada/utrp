@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
+#include "Graph.h"
 #include "solution.h"
 #include "matrix.h"
 
@@ -114,7 +115,19 @@ void solution::calculate(void){
         }
     }
 
+    Graph G(nodes);
+    G.read(time_matrix);
+    G.set_source(5);
+    G.dijkstra();
+    //G.print_deb();
+    G.output();
+    //last_index = G.fill_set(sol_m, last_index, n_routes, max_routes);
+    G.print_sol();
+
     evaluateCosts();
+
+
+
 }
 
 bool solution::is_feasible(std::vector<int>* s){
