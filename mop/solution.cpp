@@ -183,7 +183,8 @@ void solution::calculate(int iter){
                 G.SetPaths();
                 G.fill_matrix(costMatrix, i);
             }
-            evaluateCosts(sol_number);
+
+            evaluateCosts(*it, sol_number);
             sol_number++;
         }
         //clone
@@ -239,7 +240,7 @@ double solution::PassengerCost(std::vector<int>* s){
 }
 
 
-double solution::OperatorCost(void){
+double solution::OperatorCost(Routes current_routes){
 
     /*
         The operator cost is the sum of the time between nodes of routes.
@@ -249,12 +250,10 @@ double solution::OperatorCost(void){
 
      fo_cost = 0.0;
 
-
-    for(SolIter it=Q.begin(); it != Q.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            fo_cost += RouteOperatorCost(&(*jt));
-        }
+    for(RoutesIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
+        fo_cost += RouteOperatorCost(&(*jt));
     }
+    
 
     //std::cout << "Total Operator Cost: " << fo_cost << std::endl;
 
@@ -282,10 +281,10 @@ double solution::RouteOperatorCost(std::vector<int>* s){
     return fo_value;
 }
 
-void solution::evaluateCosts(int number){
+void solution::evaluateCosts(Routes current_routes, int number){
     double op_cost, pass_cost;
 
-    op_cost = OperatorCost();
+    op_cost = OperatorCost(current_routes);
     //pass_cost = PassengerCost();
 
     std::cout << "Solution # " << number << std::endl;
