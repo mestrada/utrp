@@ -103,6 +103,21 @@ void solution::setTimeMatrix(int** tmatrix){
     time_matrix = tmatrix;
 }
 
+void solution::InitializeCostMatrix(void){
+    costMatrix = (int**)malloc(nodes*sizeof(int*));
+    for(int i =0; i < nodes; i++){
+        costMatrix[i] = (int *) malloc(nodes *sizeof (int));
+    }
+}
+
+void solution::ResetCostMatrix(void){
+    for(int i=0; i<nodes; i++){
+        for(int j=0; j<nodes; j++){
+        costMatrix[i][j] = -1;
+        }
+    }
+}
+
 void solution::calculate(void){
     //      1b. Store the best individuals in Ag
     Ag = Q;
@@ -115,23 +130,16 @@ void solution::calculate(void){
         }
     }
 
-
-    int ** costMatrix;
-
-    costMatrix = (int**)malloc(nodes*sizeof(int*));
-    for(int i =0; i < nodes; i++){
-        costMatrix[i] = (int *) malloc(nodes *sizeof (int));
-    }
+    InitializeCostMatrix();
+    ResetCostMatrix();
 
     for(int i=0; i<nodes; i++){
         Graph G(nodes);
         G.read(time_matrix);
         G.set_source(i);
         G.dijkstra();
-        
+
         G.SetPaths();
-        
-        //G.print_sol();
 
         G.fill_matrix(costMatrix, i);
     }

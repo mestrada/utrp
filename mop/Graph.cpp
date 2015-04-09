@@ -175,25 +175,10 @@ void Graph::print_sol(){
 
 }
 
-/*void Graph::returnCosts(void){
-
-    costMatrix = (int**)malloc(numOfVerticesn_nodes*sizeof(int*));
-    for(int i =0; i < numOfVertices; i++){
-        costMatrix[i] = (int *) malloc(numOfVertices *sizeof (int));
-    }
-
-
-}*/
-
-/*int Graph::sum_routes(list<int> route){
-    for (int i = 0; i < count; ++i)
-    {
-    }
-}    */
 
 void Graph::fill_matrix(int** &mat, int &source){
     for(int i=0; i<numOfVertices; i++){
-        cout << "Sol " << i << endl;
+        cout << "Sol ---" << i << endl;
         int cost = 0;
         int index = 0;
 

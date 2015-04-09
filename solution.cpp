@@ -78,7 +78,7 @@ void solution::generate_solution(int **m_tt, double prob){
         //G.print_deb();
         G.output();
         last_index = G.fill_set(sol_m, last_index, n_routes, max_routes);
-        //G.print_sol();
+        G.print_sol();
         //G.~Graph();
         //break;
     }

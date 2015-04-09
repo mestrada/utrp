@@ -34,20 +34,21 @@ class solution
         int nodes;
         unsigned seed;
 
-
         Solutions Q;
         Solutions Ab;
         Solutions Ag;
         Solutions P;
 
-
         int** demand_matrix;
         int** time_matrix;
+        int** costMatrix;
 
         bool is_feasible(std::vector<int>*);
         double OperatorCost(void);
         double RouteOperatorCost(std::vector<int>*);
         double PassengerCost(std::vector<int>*);
         void evaluateCosts(void);
+        void InitializeCostMatrix(void);
+        void ResetCostMatrix(void);
 };
 #endif
