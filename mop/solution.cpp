@@ -8,8 +8,8 @@
 #include "matrix.h"
 
 
-solution::solution(int population, int n_routes, int n_nodes, unsigned seed):
-pop_size(population), routes(n_routes), nodes(n_nodes), seed(seed){
+solution::solution(int population, int n_routes, int n_nodes, double mutation_prob, unsigned seed):
+pop_size(population), routes(n_routes), nodes(n_nodes), mutation_prob(mutation_prob), seed(seed){
 
     int rand_route_node;
 
@@ -96,6 +96,21 @@ void solution::print(){
     }
 }
 
+void solution::printAntigens(){
+    std::cout << "Printing Ag" << std::endl;
+
+    for(int i=0; i<pop_size; i++){
+        std::cout << "Solution # " << i << std::endl; 
+        for(int j=0; j<routes; j++){
+            for(int k=0; k<routes; k++){
+                std::cout << Ag[i][j][k] << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+}
+
 void solution::setDemandMatrix(int** dmatrix){
     demand_matrix = dmatrix;
 }
@@ -149,6 +164,37 @@ void solution::setCurrentTimeMatrix(Routes current_routes){
 
 }
 
+void solution::mutate(double mutate_prob){
+
+    double p;
+    int rand_route_node;
+        
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+                p = (double) rand() / RAND_MAX;
+                if(p < mutate_prob){
+
+                    while(true){
+                        rand_route_node = (int) (rand() % nodes);
+                        if(!is_in(rand_route_node, *jt)){
+                            //std::cout << "Change " << *kt << "for " << rand_route_node << endl;
+                            *kt = rand_route_node;
+                            break;
+                        }
+                    }
+                    
+                    
+                        
+                }
+            }
+        }
+    }
+
+}
+
+
+
 void solution::calculate(int iter){
     
     int iteration = 0;
@@ -171,6 +217,8 @@ void solution::calculate(int iter){
 
         int sol_number = 0;
 
+        printAntigens();
+
         for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
             
             setCurrentTimeMatrix(*it);
@@ -191,6 +239,8 @@ void solution::calculate(int iter){
 
         //mutate
 
+        std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
+        mutate(mutation_prob);
 
         iteration++;
     }

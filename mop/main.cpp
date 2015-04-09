@@ -83,7 +83,7 @@ int main (int argc, char **argv)
     demand_matrix.print();
     time_matrix.print();
 
-    solution sol (population, number_routes, n_nodes, seed);
+    solution sol (population, number_routes, n_nodes, mutation_prob, seed);
 
     sol.print();
 
@@ -91,7 +91,7 @@ int main (int argc, char **argv)
 
     sol.setTimeMatrix(time_matrix.getMatrix());
 
-    sol.calculate(1);
+    sol.calculate(max_iter);
 
     // Solution = Set of N routes
 
