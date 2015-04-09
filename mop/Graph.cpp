@@ -117,9 +117,8 @@ void Graph::printPath(int node, int parent)
         }
 }
 
-void Graph::output()
+void Graph::SetPaths()
 {
-    cout << "Printing G output" << endl;
     for(int i=0;i<numOfVertices;i++) {
         if(i == source){}
             //cout<<source+1<<".."<<source+1;

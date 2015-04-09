@@ -49,7 +49,7 @@ void set_source(int);
 void initialize();
 int getClosestUnmarkedNode();
 void dijkstra();
-void output();
+void SetPaths();
 void printPath(int, int);
 void print_deb();
 void insert_node(int, int);

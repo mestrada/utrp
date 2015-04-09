@@ -129,9 +129,9 @@ void solution::calculate(void){
         G.set_source(i);
         G.dijkstra();
         
-        G.output();
+        G.SetPaths();
         
-        G.print_sol();
+        //G.print_sol();
 
         G.fill_matrix(costMatrix, i);
     }
