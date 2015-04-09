@@ -39,6 +39,7 @@ bool *mark;
 int source;
 int numOfVertices;
 list<int>  *short_routes;
+int** cost_matrix;
 public:
 Graph();
 Graph(int n);
@@ -54,6 +55,7 @@ void print_deb();
 void insert_node(int, int);
 int fill_set(int **, int, int, int);
 void print_sol();
+void fill_matrix(int** &, int &);
 };
 
 

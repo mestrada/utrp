@@ -1,6 +1,16 @@
 #include "Graph.h"
+#include <iterator>     // std::next
 
 using namespace std;
+
+template <typename ForwardIt>
+ForwardIt next(ForwardIt it, 
+               typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+{
+    std::advance(it, n);
+    return it;
+}
+
 
 Graph::Graph(){}
 
@@ -165,61 +175,39 @@ void Graph::print_sol(){
     }
 
 }
-/*
-int main()
-{
-Graph G;
-G.read(m_tt);
-G.set_source(1);
-G.dijkstra();
-G.output();
-return 0;
+
+/*void Graph::returnCosts(void){
+
+    costMatrix = (int**)malloc(numOfVerticesn_nodes*sizeof(int*));
+    for(int i =0; i < numOfVertices; i++){
+        costMatrix[i] = (int *) malloc(numOfVertices *sizeof (int));
+    }
+
+
+}*/
+
+/*int Graph::sum_routes(list<int> route){
+    for (int i = 0; i < count; ++i)
+    {
+    }
+}    */
+
+void Graph::fill_matrix(int** &mat, int &source){
+    for(int i=0; i<numOfVertices; i++){
+        cout << "Sol " << i << endl;
+        int cost = 0;
+        int index = 0;
+
+        for(list<int>::iterator it=short_routes[i].begin(); it!=short_routes[i].end(); it++){
+            /*cout << "i: " << i << ' ';*/
+            /*cout << "index: " << index << endl;*/
+            if(index != short_routes[i].size() - 1){
+            cost += adjMatrix[*it][*(next(short_routes[i].begin(), index + 1))] ;
+            }
+            index++;
+        }
+        cout << "Costs for " << source << "," << i << ": " << cost << endl;
+        mat[source][i] = cost;
+        mat[i][source] = cost;
+    }
 }
-*/
-/*Sample output:
-
-[vinod@thelegendbox cpp]$ g++ dijkstra.cpp
-[vinod@thelegendbox cpp]$ ./a.out
-Enter the number of vertices of the graph(should be > 0)
-5
-Enter the adjacency matrix for the graph
-To enter infinity enter 999
-Enter the (+ve)weights for the row 0
-0
-2
-4
-999
-1
-Enter the (+ve)weights for the row 1
-2
-0
-7
-3
-999
-Enter the (+ve)weights for the row 2
-4
-7
-0
-2
-999
-Enter the (+ve)weights for the row 3
-999
-3
-2
-0
-6
-Enter the (+ve)weights for the row 4
-1
-999
-999
-6
-0
-Enter the source vertex
-0
-0..0->0
-0..1..->2
-0..2..->4
-0..1..3..->5
-0..4..->1
-
-*/

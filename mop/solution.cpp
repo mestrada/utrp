@@ -115,14 +115,26 @@ void solution::calculate(void){
         }
     }
 
-    Graph G(nodes);
-    G.read(time_matrix);
-    G.set_source(5);
-    G.dijkstra();
-    //G.print_deb();
-    G.output();
-    //last_index = G.fill_set(sol_m, last_index, n_routes, max_routes);
-    G.print_sol();
+
+    int ** costMatrix;
+
+    costMatrix = (int**)malloc(nodes*sizeof(int*));
+    for(int i =0; i < nodes; i++){
+        costMatrix[i] = (int *) malloc(nodes *sizeof (int));
+    }
+
+    for(int i=0; i<nodes; i++){
+        Graph G(nodes);
+        G.read(time_matrix);
+        G.set_source(i);
+        G.dijkstra();
+        
+        G.output();
+        
+        G.print_sol();
+
+        G.fill_matrix(costMatrix, i);
+    }
 
     evaluateCosts();
 
