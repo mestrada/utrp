@@ -172,6 +172,13 @@ void solution::mutate(double mutate_prob){
     for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+                // Force feasibility
+                if(kt != (*(jt-1)).end())
+                    if(current_time_matrix[*(kt+1)][*kt] != -1){
+                        //&& current_time_matrix[*(kt+1)][*kt] != -1)
+                        /*cout << "ctt " << current_time_matrix[*(kt+1)][*kt] << endl;
+                        cout << "kt & kt-1 " << *kt << *(kt+1) << endl;*/
+                        continue;}
                 p = (double) rand() / RAND_MAX;
                 if(p < mutate_prob){
 
@@ -217,7 +224,7 @@ void solution::calculate(int iter){
 
         int sol_number = 0;
 
-        printAntigens();
+        //printAntigens();
 
         for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
             
@@ -244,7 +251,7 @@ void solution::calculate(int iter){
 
         iteration++;
     }
-
+    printAntigens();
 
 }
 
