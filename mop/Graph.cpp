@@ -107,9 +107,10 @@ void Graph::printPath(int node, int parent)
         //cout<<node+1<<"..";
         insert_node(parent, node);
     }
-    else if(predecessor[node] == -1)
-        cout<<"No path from "<<source<<"to "<<node<<endl;
-    //TODO: Clean Route
+    else if(predecessor[node] == -1){
+        //cout<<"No path from "<<source<<"to "<<node<<endl;
+        //TODO: Clean Route
+        }
         else {
             printPath(predecessor[node], parent);
             //cout<<node+1<<"..";
@@ -178,19 +179,18 @@ void Graph::print_sol(){
 
 void Graph::fill_matrix(int** &mat, int &source){
     for(int i=0; i<numOfVertices; i++){
-        cout << "Sol ---" << i << endl;
+
         int cost = 0;
         int index = 0;
 
         for(list<int>::iterator it=short_routes[i].begin(); it!=short_routes[i].end(); it++){
-            /*cout << "i: " << i << ' ';*/
-            /*cout << "index: " << index << endl;*/
+
             if(index != short_routes[i].size() - 1){
             cost += adjMatrix[*it][*(next(short_routes[i].begin(), index + 1))] ;
             }
             index++;
         }
-        cout << "Costs for " << source << "," << i << ": " << cost << endl;
+
         mat[source][i] = cost;
         mat[i][source] = cost;
     }

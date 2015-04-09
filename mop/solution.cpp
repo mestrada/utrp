@@ -11,7 +11,7 @@
 solution::solution(int population, int n_routes, int n_nodes, unsigned seed):
 pop_size(population), routes(n_routes), nodes(n_nodes), seed(seed){
 
-    int rand_route;
+    int rand_route_node;
 
     // Solution = Set of N routes
 
@@ -43,14 +43,14 @@ pop_size(population), routes(n_routes), nodes(n_nodes), seed(seed){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
 
-                rand_route = (int) (rand() % nodes);
+                rand_route_node = (int) (rand() % nodes);
                 // Constraint: No loops and no repetitions        
                 if((*jt).empty()){
-                    *kt = rand_route;
+                    *kt = rand_route_node;
                 }
                 else{
-                    if(!is_in(rand_route, *jt)){
-                        *kt = rand_route;
+                    if(!is_in(rand_route_node, *jt)){
+                        *kt = rand_route_node;
                     }
                     else{
                         --kt;
@@ -85,6 +85,7 @@ void solution::print(){
     std::cout << "Printing Q" << std::endl;
 
     for(int i=0; i<pop_size; i++){
+        std::cout << "Solution # " << i << std::endl; 
         for(int j=0; j<routes; j++){
             for(int k=0; k<routes; k++){
                 std::cout << Q[i][j][k] << "\t";
@@ -103,6 +104,21 @@ void solution::setTimeMatrix(int** tmatrix){
     time_matrix = tmatrix;
 }
 
+void solution::InitializeMatrix(int** &m){
+    m = (int**)malloc(nodes*sizeof(int*));
+    for(int i =0; i < nodes; i++){
+        m[i] = (int *) malloc(nodes *sizeof (int));
+    }
+}
+
+void solution::ResetMatrix(int** &m){
+    for(int i=0; i<nodes; i++){
+        for(int j=0; j<nodes; j++){
+            m[i][j] = -1;
+        }
+    }
+}
+
 void solution::InitializeCostMatrix(void){
     costMatrix = (int**)malloc(nodes*sizeof(int*));
     for(int i =0; i < nodes; i++){
@@ -118,7 +134,25 @@ void solution::ResetCostMatrix(void){
     }
 }
 
-void solution::calculate(void){
+void solution::setCurrentTimeMatrix(Routes current_routes){
+
+    InitializeMatrix(current_time_matrix);
+    ResetMatrix(current_time_matrix);
+
+    for(RoutesIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
+        for(RouteIter kt=(*jt).begin(); kt != (*jt).end() - 1; ++kt){
+
+            current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];
+            current_time_matrix[*(kt + 1)][*kt] = time_matrix[*(kt + 1)][*kt];
+        }
+    }
+
+}
+
+void solution::calculate(int iter){
+    
+    int iteration = 0;
+
     //      1b. Store the best individuals in Ag
     Ag = Q;
 
@@ -131,21 +165,34 @@ void solution::calculate(void){
     }
 
     InitializeCostMatrix();
-    ResetCostMatrix();
 
-    for(int i=0; i<nodes; i++){
-        Graph G(nodes);
-        G.read(time_matrix);
-        G.set_source(i);
-        G.dijkstra();
+    while(iteration < iter){
+        ResetCostMatrix();
 
-        G.SetPaths();
+        int sol_number = 0;
 
-        G.fill_matrix(costMatrix, i);
+        for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+            
+            setCurrentTimeMatrix(*it);
+
+            for(int i=0; i<nodes; i++){
+                Graph G(nodes);
+                G.read(current_time_matrix);
+                G.set_source(i);
+                G.dijkstra();
+                G.SetPaths();
+                G.fill_matrix(costMatrix, i);
+            }
+            evaluateCosts(sol_number);
+            sol_number++;
+        }
+        //clone
+
+        //mutate
+
+
+        iteration++;
     }
-
-    evaluateCosts();
-
 
 
 }
@@ -209,7 +256,7 @@ double solution::OperatorCost(void){
         }
     }
 
-    std::cout << "Total Operator Cost: " << fo_cost << std::endl;
+    //std::cout << "Total Operator Cost: " << fo_cost << std::endl;
 
     return fo_cost;
 }
@@ -223,19 +270,24 @@ double solution::RouteOperatorCost(std::vector<int>* s){
 
     for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
             if(it != (s->end() -1)){
-                if (time_matrix[*it][*(it + 1)] > 0){
-                    fo_value += time_matrix[*it][*(it + 1)];
+                if (current_time_matrix[*it][*(it + 1)] > 0){
+                    fo_value += current_time_matrix[*it][*(it + 1)];
                 }else{
                     fo_value += INF;
                 }
             }
         }
-    std::cout << "Route Operator Cost: " << fo_value << std::endl;
+    //std::cout << "Route Operator Cost: " << fo_value << std::endl;
 
     return fo_value;
 }
 
-void solution::evaluateCosts(void){
-    
-    OperatorCost();  
+void solution::evaluateCosts(int number){
+    double op_cost, pass_cost;
+
+    op_cost = OperatorCost();
+    //pass_cost = PassengerCost();
+
+    std::cout << "Solution # " << number << std::endl;
+    std::cout << "Total Operator cost: " << op_cost << std::endl;
 }

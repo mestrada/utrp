@@ -27,7 +27,7 @@ class solution
         void print();
         void setDemandMatrix(int **);
         void setTimeMatrix(int **);
-        void calculate(void);
+        void calculate(int);
     private:
         int pop_size;
         int routes;
@@ -41,14 +41,19 @@ class solution
 
         int** demand_matrix;
         int** time_matrix;
+        int** current_time_matrix;
         int** costMatrix;
 
         bool is_feasible(std::vector<int>*);
         double OperatorCost(void);
         double RouteOperatorCost(std::vector<int>*);
         double PassengerCost(std::vector<int>*);
-        void evaluateCosts(void);
+        void setCurrentTimeMatrix(Routes);
+        void evaluateCosts(int);
+        void InitializeMatrix(int** &);
+        void ResetMatrix(int** &);
         void InitializeCostMatrix(void);
         void ResetCostMatrix(void);
 };
 #endif
+
