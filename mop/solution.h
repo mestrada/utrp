@@ -48,7 +48,7 @@ class solution
         bool is_feasible(std::vector<int>*);
         double OperatorCost(Routes);
         double RouteOperatorCost(std::vector<int>*);
-        double PassengerCost(std::vector<int>*);
+        double PassengerCost(Routes);
         void setCurrentTimeMatrix(Routes);
         void printAntigens();
         void mutate(double);
@@ -57,6 +57,7 @@ class solution
         void ResetMatrix(int** &);
         void InitializeCostMatrix(void);
         void ResetCostMatrix(void);
+        void evaluateAllCosts(void);
 };
 #endif
 

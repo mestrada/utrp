@@ -201,76 +201,7 @@ void solution::mutate(double mutate_prob){
 }
 
 
-
-void solution::calculate(int iter){
-    
-    int iteration = 0;
-
-    //      1b. Store the best individuals in Ag
-    Ag = Q;
-
-    for(SolIter it=Q.begin(); it != Q.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            if(is_feasible(&(*jt))) {
-
-            }
-        }
-    }
-
-    InitializeCostMatrix();
-
-    while(iteration < iter){
-        ResetCostMatrix();
-
-        int sol_number = 0;
-
-        //printAntigens();
-
-        for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
-            
-            setCurrentTimeMatrix(*it);
-
-            for(int i=0; i<nodes; i++){
-                Graph G(nodes);
-                G.read(current_time_matrix);
-                G.set_source(i);
-                G.dijkstra();
-                G.SetPaths();
-                G.fill_matrix(costMatrix, i);
-            }
-
-            evaluateCosts(*it, sol_number);
-            sol_number++;
-        }
-        //clone
-
-        //mutate
-
-        std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
-        mutate(mutation_prob);
-
-        iteration++;
-    }
-    printAntigens();
-
-}
-
-bool solution::is_feasible(std::vector<int>* s){
-
-    for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
-        if(it != (s->end() -1)){
-            if (time_matrix[*it][*(it + 1)] < 0){
-                /*std::cout << "Not feasible" << std::endl;*/
-                return false;
-            }
-        }
-    }
-    /*std::cout << "Feasible" << std::endl;*/
-    return true;
-}
-
-
-double solution::PassengerCost(std::vector<int>* s){
+double solution::PassengerCost(Routes current_routes){
 
     /*
         
@@ -279,16 +210,34 @@ double solution::PassengerCost(std::vector<int>* s){
 
     double fo_value = 0.0;
 
+    setCurrentTimeMatrix(current_routes);
+
+    ResetCostMatrix();
+
+    for(int i=0; i<nodes; i++){
+        Graph G(nodes);
+        G.read(current_time_matrix);
+        G.set_source(i);
+        G.dijkstra();
+        G.SetPaths();
+        G.fill_matrix(costMatrix, i);
+    }
 
     for (int i = 0; i < nodes; ++i)
     {
-        /* code */
         for (int j = 0; j < nodes; ++j)
         {
-            /* code */
+            // SUM of L COSTS * Demand / Total demand
 
-            // demand_matrix;
-            // time_matrix;
+            if (i == j)
+                continue;
+
+            if (costMatrix[i][j] == EMPTY){
+                fo_value += demand_matrix[i][j] * INF;
+            }
+            else{
+                fo_value += demand_matrix[i][j] * costMatrix[i][j];
+            }
 
         }
     }
@@ -342,8 +291,95 @@ void solution::evaluateCosts(Routes current_routes, int number){
     double op_cost, pass_cost;
 
     op_cost = OperatorCost(current_routes);
-    //pass_cost = PassengerCost();
+    pass_cost = PassengerCost(current_routes);
 
     std::cout << "Solution # " << number << std::endl;
     std::cout << "Total Operator cost: " << op_cost << std::endl;
+    std::cout << "Total Passenger cost: " << pass_cost << std::endl;
+}
+
+void solution::evaluateAllCosts(void){
+
+    int sol_number_aux = 0;
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+        evaluateCosts(*it, sol_number_aux);
+        sol_number_aux++;
+    }
+
+}
+
+void solution::calculate(int iter){
+    
+    int iteration = 0;
+
+    //      1b. Store the best individuals in Ag
+    Ag = Q;
+
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            if(is_feasible(&(*jt))) {
+
+            }
+        }
+    }
+
+    //InitializeMatrix(current_time_matrix);
+
+    InitializeCostMatrix();
+
+    current_time_matrix = time_matrix;
+
+    evaluateAllCosts();
+
+    while(iteration < iter){
+        ResetCostMatrix();
+
+        int sol_number = 0;
+
+        //printAntigens();
+
+        for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+            
+            setCurrentTimeMatrix(*it);
+
+            for(int i=0; i<nodes; i++){
+                Graph G(nodes);
+                G.read(current_time_matrix);
+                G.set_source(i);
+                G.dijkstra();
+                G.SetPaths();
+                G.fill_matrix(costMatrix, i);
+            }
+            //std::cout << "Total cost for sol: " << sol_number << std::endl;
+            //evaluateAllCosts();
+            //evaluateCosts(*it, sol_number);
+            sol_number++;
+        }
+        //clone
+
+        //mutate
+
+        //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
+        mutate(mutation_prob);
+
+        iteration++;
+    }
+    std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
+    printAntigens();
+    evaluateAllCosts();
+
+}
+
+bool solution::is_feasible(std::vector<int>* s){
+
+    for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
+        if(it != (s->end() -1)){
+            if (time_matrix[*it][*(it + 1)] < 0){
+                /*std::cout << "Not feasible" << std::endl;*/
+                return false;
+            }
+        }
+    }
+    /*std::cout << "Feasible" << std::endl;*/
+    return true;
 }
