@@ -8,8 +8,11 @@
 #include "matrix.h"
 
 
-solution::solution(int population, int n_routes, int n_nodes, double mutation_prob, unsigned seed):
-pop_size(population), routes(n_routes), nodes(n_nodes), mutation_prob(mutation_prob), seed(seed){
+solution::solution(int population, int n_routes, int n_nodes, int minlen,
+    int maxlen, double mutation_prob, unsigned seed):
+    pop_size(population), routes(n_routes), nodes(n_nodes),
+    minlength(minlen), maxlength(maxlen), mutation_prob(mutation_prob),
+    seed(seed){
 
     int rand_route_node;
 
@@ -164,7 +167,38 @@ void solution::setCurrentTimeMatrix(Routes current_routes){
 
 }
 
-void solution::mutate(double mutate_prob){
+void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
+    
+    double p;
+
+    int rand_route_node;
+    int rand_idx;
+
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            p = (double) rand() / RAND_MAX;
+
+            if(p < mutate_prob){
+                rand_idx = rand() % (*jt).size();
+
+                if(p < 0.5){
+                    // Add node
+                    if((*jt).size() == maxLen)
+                        continue;
+                    (*jt).emplace((*jt).begin() + rand_idx);
+                }
+                else{
+                    // Remove node
+                    if ((*jt).size() == minLen)
+                        continue;
+                    (*jt).erase((*jt).begin() + rand_idx);
+                }
+            }
+        }
+
+}
+
+void solution::mutateChange(double mutate_prob){
 
     double p;
     int rand_route_node;
@@ -311,6 +345,7 @@ void solution::evaluateAllCosts(void){
 void solution::calculate(int iter){
     
     int iteration = 0;
+    double mutation_type;
 
     //      1b. Store the best individuals in Ag
     Ag = Q;
@@ -360,7 +395,12 @@ void solution::calculate(int iter){
         //mutate
 
         //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
-        mutate(mutation_prob);
+
+        mutation_type = (double) rand() / RAND_MAX;
+        if(mutation_type < 0.5)
+            mutateChange(mutation_prob);
+        else
+            mutateResize(mutate_prob, )
 
         iteration++;
     }

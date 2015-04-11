@@ -21,7 +21,7 @@ class solution
 {
     public:
         
-        solution(int, int, int, double, unsigned);
+        solution(int, int, int, int, int, double, unsigned);
         ~solution();
         bool is_in(int, std::vector<int>);
         void print();
@@ -32,6 +32,8 @@ class solution
         int pop_size;
         int routes;
         int nodes;
+        int minlength;
+        int maxlength;
         double mutation_prob;
         unsigned seed;
 
@@ -51,7 +53,8 @@ class solution
         double PassengerCost(Routes);
         void setCurrentTimeMatrix(Routes);
         void printAntigens();
-        void mutate(double);
+        void mutateChange(double);
+        void mutateResize(double, int, int);
         void evaluateCosts(Routes, int);
         void InitializeMatrix(int** &);
         void ResetMatrix(int** &);

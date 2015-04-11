@@ -83,7 +83,8 @@ int main (int argc, char **argv)
     demand_matrix.print();
     time_matrix.print();
 
-    solution sol (population, number_routes, n_nodes, mutation_prob, seed);
+    solution sol (population, number_routes, n_nodes, min_length,
+        max_length, mutation_prob, seed);
 
     sol.print();
 
