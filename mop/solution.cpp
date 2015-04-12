@@ -87,7 +87,7 @@ bool solution::is_in(int node, std::vector<int> sol){
 void solution::print(){
     std::cout << "Printing Q" << std::endl;
 
-    for(int i=0; i<pop_size; i++){
+/*    for(int i=0; i<pop_size; i++){
         std::cout << "Solution # " << i << std::endl; 
         for(int j=0; j<routes; j++){
             for(int k=0; k<routes; k++){
@@ -96,12 +96,38 @@ void solution::print(){
             std::cout << std::endl;
         }
         std::cout << std::endl;
+    }*/
+    int sol_n = 0;
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        std::cout << "Solution # " << sol_n << std::endl;
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+                std::cout << *kt << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        sol_n++;
     }
 }
 
 void solution::printAntigens(){
     std::cout << "Printing Ag" << std::endl;
 
+    int sol_n = 0;
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+        std::cout << "Solution # " << sol_n << std::endl;
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+                std::cout << *kt << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        sol_n++;
+    }
+
+/*
     for(int i=0; i<pop_size; i++){
         std::cout << "Solution # " << i << std::endl; 
         for(int j=0; j<routes; j++){
@@ -111,7 +137,7 @@ void solution::printAntigens(){
             std::cout << std::endl;
         }
         std::cout << std::endl;
-    }
+    }*/
 }
 
 void solution::setDemandMatrix(int** dmatrix){
@@ -170,6 +196,7 @@ void solution::setCurrentTimeMatrix(Routes current_routes){
 void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     
     double p;
+    int mutation_t;
 
     int rand_route_node;
     int rand_idx;
@@ -180,22 +207,27 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
 
             if(p < mutate_prob){
                 rand_idx = rand() % (*jt).size();
-
-                if(p < 0.5){
+                mutation_t = (int) rand() % 2;
+                if(mutation_t != 1){
                     // Add node
                     if((*jt).size() == maxLen)
                         continue;
-                    (*jt).emplace((*jt).begin() + rand_idx);
+
+                    rand_route_node = (int) rand() % nodes;
+                    //jt->emplace(jt->begin() + rand_idx, rand_route_node);
+                    jt->push_back(rand_route_node);
                 }
                 else{
                     // Remove node
                     if ((*jt).size() == minLen)
                         continue;
+
                     (*jt).erase((*jt).begin() + rand_idx);
                 }
             }
         }
 
+    }
 }
 
 void solution::mutateChange(double mutate_prob){
@@ -207,15 +239,15 @@ void solution::mutateChange(double mutate_prob){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
                 // Force feasibility
-                if(kt != (*(jt-1)).end())
+                if(kt != (jt->end()) - 1){
                     if(current_time_matrix[*(kt+1)][*kt] != -1){
                         //&& current_time_matrix[*(kt+1)][*kt] != -1)
                         /*cout << "ctt " << current_time_matrix[*(kt+1)][*kt] << endl;
                         cout << "kt & kt-1 " << *kt << *(kt+1) << endl;*/
                         continue;}
+                }
                 p = (double) rand() / RAND_MAX;
                 if(p < mutate_prob){
-
                     while(true){
                         rand_route_node = (int) (rand() % nodes);
                         if(!is_in(rand_route_node, *jt)){
@@ -231,7 +263,6 @@ void solution::mutateChange(double mutate_prob){
             }
         }
     }
-
 }
 
 
@@ -397,10 +428,10 @@ void solution::calculate(int iter){
         //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
 
         mutation_type = (double) rand() / RAND_MAX;
-        if(mutation_type < 0.5)
+        if(mutation_type < 0.7)
             mutateChange(mutation_prob);
         else
-            mutateResize(mutate_prob, )
+            mutateResize(mutation_prob, minlength, maxlength);
 
         iteration++;
     }

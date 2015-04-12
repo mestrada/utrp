@@ -27,7 +27,7 @@ dijkstra()                    : This method will implement the dijkstra’s algo
 
 #include <iostream>
 #include <list>
-#define INFINITY 999
+#define MAXDIST 999
 using namespace std;
 
 class Graph

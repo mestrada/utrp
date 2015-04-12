@@ -62,14 +62,14 @@ void Graph::initialize()
     for(int i=0;i<numOfVertices;i++) {
         mark[i] = false;
         predecessor[i] = -1;
-        distance[i] = INFINITY;
+        distance[i] = MAXDIST;
     }
     distance[source] = 0;
 }
 
 int Graph::getClosestUnmarkedNode()
 {
-    int minDistance = INFINITY;
+    int minDistance = MAXDIST;
     int closestUnmarkedNode;
     for(int i=0;i<numOfVertices;i++) {
         if((!mark[i]) && ( minDistance >= distance[i])) {
@@ -83,7 +83,7 @@ return closestUnmarkedNode;
 void Graph::dijkstra()
 {
     initialize();
-    int minDistance = INFINITY;
+    int minDistance = MAXDIST;
     int closestUnmarkedNode;
     int count = 0;
     while(count < numOfVertices) {
