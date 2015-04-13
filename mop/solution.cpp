@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <algorithm>
+#include <iterator>     // std::vector::emplace
 
 #include "Graph.h"
 #include "solution.h"
@@ -215,7 +216,8 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
 
                     rand_route_node = (int) rand() % nodes;
                     //jt->emplace(jt->begin() + rand_idx, rand_route_node);
-                    jt->push_back(rand_route_node);
+                    //jt->push_back(rand_route_node);
+                    jt->insert(jt->begin() + rand_idx, rand_route_node);
                 }
                 else{
                     // Remove node
