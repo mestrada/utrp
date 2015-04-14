@@ -7,7 +7,11 @@
 #include "Graph.h"
 #include "solution.h"
 #include "matrix.h"
+#include <math.h> 
 
+
+bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
+bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
 
 solution::solution(int population, int n_routes, int n_nodes, int minlen,
     int maxlen, double mutation_prob, unsigned seed):
@@ -35,6 +39,9 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
     Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
     // P pool of clones
     P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
+
+    current_values = Individuals(pop_size);
+    pool_values = Individuals(2 * pop_size);
 
     // Steps MOAIS-HV Pierrard & Coello
 
@@ -202,7 +209,7 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     int rand_route_node;
     int rand_idx;
 
-    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+    for(SolIter it=P.begin(); it != P.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             p = (double) rand() / RAND_MAX;
 
@@ -237,7 +244,7 @@ void solution::mutateChange(double mutate_prob){
     double p;
     int rand_route_node;
         
-    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+    for(SolIter it=P.begin(); it != P.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
                 // Force feasibility
@@ -355,25 +362,73 @@ double solution::RouteOperatorCost(std::vector<int>* s){
     return fo_value;
 }
 
-void solution::evaluateCosts(Routes current_routes, int number){
+individual solution::evaluateCosts(Routes current_routes, int number){
+    ind ind_eval;
     double op_cost, pass_cost;
 
     op_cost = OperatorCost(current_routes);
     pass_cost = PassengerCost(current_routes);
 
-    std::cout << "Solution # " << number << std::endl;
-    std::cout << "Total Operator cost: " << op_cost << std::endl;
-    std::cout << "Total Passenger cost: " << pass_cost << std::endl;
+    //std::cout << "Solution # " << number << std::endl;
+    //std::cout << "Total Operator cost: " << op_cost << std::endl;
+    //std::cout << "Total Passenger cost: " << pass_cost << std::endl;
+
+    ind_eval.ocost = op_cost;
+    ind_eval.pcost = pass_cost;
+
+    return ind_eval;
 }
 
-void solution::evaluateAllCosts(void){
+int solution::getNonDominatedByOperatorCost(void){
+    int min_idx = 0;
+
+    for(int i=1; i<pop_size; i++){
+        if(current_values[i].ocost < current_values[min_idx].ocost)
+            min_idx = i;
+    }
+
+    return min_idx;
+
+}
+
+int solution::getNonDominatedByPassengerCost(void){
+    int min_idx = 0;
+
+    for(int i=1; i<pop_size; i++){
+        if(current_values[i].pcost < current_values[min_idx].pcost)
+            min_idx = i;
+    }
+
+    return min_idx;
+
+}
+
+void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
 
     int sol_number_aux = 0;
-    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
-        evaluateCosts(*it, sol_number_aux);
+    for(SolIter it=sol_ref.begin(); it != sol_ref.end(); ++it){
+        ind_ref[sol_number_aux] = evaluateCosts(*it, sol_number_aux);
         sol_number_aux++;
     }
 
+    for(int i=0; i< pop_size; i++)
+        std::cout << "Value for sol " << i << ":\t" << current_values[i].ocost << " | " << current_values[i].pcost << std::endl;
+
+}
+
+void solution::clone(int ndo, int ndp){
+    
+    for(int i=0; i<2 * pop_size; i++){
+        if(i< pop_size){
+            P[i] = Ag[i];
+        }
+        else{
+            if(i % 2 == 0)
+                P[i] = Ag[ndo];
+            else
+                P[i] = Ag[ndp];
+        }
+    }
 }
 
 void solution::calculate(int iter){
@@ -398,7 +453,7 @@ void solution::calculate(int iter){
 
     current_time_matrix = time_matrix;
 
-    evaluateAllCosts();
+    evaluateAllCosts(Ag, current_values);
 
     while(iteration < iter){
         ResetCostMatrix();
@@ -424,7 +479,20 @@ void solution::calculate(int iter){
             //evaluateCosts(*it, sol_number);
             sol_number++;
         }
+
+        evaluateAllCosts(Ag, current_values);
+
+        int ndo_idx, ndp_idx;
+        // Non-dominated Operator cost
+        ndo_idx = getNonDominatedByOperatorCost();
+        // Non-dominated Passenger cost
+        ndp_idx = getNonDominatedByPassengerCost();
+
+        std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
+
         //clone
+
+        clone(ndo_idx, ndp_idx);
 
         //mutate
 
@@ -436,11 +504,25 @@ void solution::calculate(int iter){
         else
             mutateResize(mutation_prob, minlength, maxlength);
 
+        evaluateAllCosts(P, pool_values);
+
+        std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
+
+        for(int i=0; i< floor(pop_size / 2); i++){
+            Ag[i] = P[i];
+        }
+
+        std::sort(pool_values.begin(), pool_values.end(), SortbyPassenger);
+
+        for(int i=0; i< floor(pop_size / 2); i++){
+            Ag[i + floor(pop_size / 2)] = P[i];
+        }
+
         iteration++;
     }
     std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     printAntigens();
-    evaluateAllCosts();
+    evaluateAllCosts(Ag, current_values);
 
 }
 

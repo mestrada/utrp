@@ -16,6 +16,13 @@ typedef std::vector< std::vector<std::vector<int> > >::iterator SolIter;
 typedef std::vector< std::vector<int> >::iterator RoutesIter;
 typedef std::vector<int>::iterator RouteIter;
 
+typedef struct individual
+{
+    double ocost; // Operator cost
+    double pcost; // Passenger cost
+}ind;
+
+typedef std::vector<individual> Individuals;
 
 class solution
 {
@@ -37,6 +44,9 @@ class solution
         double mutation_prob;
         unsigned seed;
 
+        Individuals current_values;
+        Individuals pool_values;
+
         Solutions Q;
         Solutions Ab;
         Solutions Ag;
@@ -55,12 +65,16 @@ class solution
         void printAntigens();
         void mutateChange(double);
         void mutateResize(double, int, int);
-        void evaluateCosts(Routes, int);
+        individual evaluateCosts(Routes, int);
         void InitializeMatrix(int** &);
         void ResetMatrix(int** &);
         void InitializeCostMatrix(void);
         void ResetCostMatrix(void);
-        void evaluateAllCosts(void);
+        //void evaluateAllCosts(void);
+        void evaluateAllCosts(Solutions, Individuals &);
+        int getNonDominatedByOperatorCost(void);
+        int getNonDominatedByPassengerCost(void);
+        void clone(int, int);
 };
 #endif
 
