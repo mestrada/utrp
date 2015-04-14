@@ -55,7 +55,7 @@ void print_deb();
 void insert_node(int, int);
 int fill_set(int **, int, int, int);
 void print_sol();
-void fill_matrix(int** &, int &);
+void fill_matrix(int** &, int);
 };
 
 

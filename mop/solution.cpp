@@ -275,7 +275,8 @@ double solution::PassengerCost(Routes current_routes){
 
     */
 
-    double fo_value = 0.0;
+    double total_cost = 0.0;
+    double total_demand = 0.0;
 
     setCurrentTimeMatrix(current_routes);
 
@@ -300,16 +301,16 @@ double solution::PassengerCost(Routes current_routes){
                 continue;
 
             if (costMatrix[i][j] == EMPTY){
-                fo_value += demand_matrix[i][j] * INF;
+                total_cost += demand_matrix[i][j] * INF;
             }
             else{
-                fo_value += demand_matrix[i][j] * costMatrix[i][j];
+                total_cost += demand_matrix[i][j] * costMatrix[i][j];
             }
-
+            total_demand += demand_matrix[i][j];
         }
     }
 
-    return fo_value;
+    return (double) total_cost / total_demand;
 }
 
 

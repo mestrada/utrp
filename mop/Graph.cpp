@@ -3,13 +3,13 @@
 
 using namespace std;
 
-// template <typename ForwardIt>
-// ForwardIt next(ForwardIt it, 
-//                typename std::iterator_traits<ForwardIt>::difference_type n = 1)
-// {
-//     std::advance(it, n);
-//     return it;
-// }
+template <typename ForwardIt>
+ForwardIt next(ForwardIt it, 
+               typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+{
+    std::advance(it, n);
+    return it;
+}
 
 
 Graph::Graph(){}
@@ -177,7 +177,7 @@ void Graph::print_sol(){
 }
 
 
-void Graph::fill_matrix(int** &mat, int &source){
+void Graph::fill_matrix(int** &mat, int source){
     for(int i=0; i<numOfVertices; i++){
 
         int cost = 0;
@@ -186,12 +186,13 @@ void Graph::fill_matrix(int** &mat, int &source){
         for(list<int>::iterator it=short_routes[i].begin(); it!=short_routes[i].end(); it++){
 
             if(index != short_routes[i].size() - 1){
-            cost += adjMatrix[*it][*(next(short_routes[i].begin(), index + 1))] ;
+                cost += adjMatrix[*it][*(next(short_routes[i].begin(), index + 1))] ;
             }
             index++;
         }
 
-        mat[source][i] = cost;
-        mat[i][source] = cost;
+        /*mat[source][i] = cost;*/
+        if(cost != 0)
+            mat[i][source] = cost;
     }
 }
