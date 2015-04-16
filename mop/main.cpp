@@ -86,12 +86,11 @@ int main (int argc, char **argv)
     solution sol (population, number_routes, n_nodes, min_length,
         max_length, mutation_prob, seed);
 
-    sol.print();
-
     sol.setDemandMatrix(demand_matrix.getMatrix());
-
+    
     sol.setTimeMatrix(time_matrix.getMatrix());
-
+    sol.generateRandomIndividuals();
+    sol.print();
     sol.calculate(max_iter);
 
     // Solution = Set of N routes

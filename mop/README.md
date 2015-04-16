@@ -39,4 +39,6 @@ Steps
 6.- Perfom mutation
 
 - 6.a. Change mutation: In this mutation a node member of a route is randlomly changed to another node that doesn't belong to the actual route.
-- 6.b. Resize mutation: 
+- 6.b. Resize mutation: In this type of mutation a new node (not in the actual route) is added or a randomly selected node is deleted.
+
+

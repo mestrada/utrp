@@ -42,34 +42,6 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
 
     current_values = Individuals(pop_size);
     pool_values = Individuals(2 * pop_size);
-
-    // Steps MOAIS-HV Pierrard & Coello
-
-    //  1.- Initialize population
-    //      1a. Generate random individuals to fill Q
-
-    std::cout << "Generate random individuals to fill Q" << std::endl;
-
-    for(SolIter it=Q.begin(); it != Q.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
-
-                rand_route_node = (int) (rand() % nodes);
-                // Constraint: No loops and no repetitions        
-                if((*jt).empty()){
-                    *kt = rand_route_node;
-                }
-                else{
-                    if(!is_in(rand_route_node, *jt)){
-                        *kt = rand_route_node;
-                    }
-                    else{
-                        --kt;
-                    }
-                }
-            }
-        }
-    }
 }
 
 solution::~solution(){
@@ -146,6 +118,62 @@ void solution::printAntigens(){
         }
         std::cout << std::endl;
     }*/
+}
+
+void solution::generateRandomIndividuals(void){
+
+    int rand_route_node;
+    // Steps MOAIS-HV Pierrard & Coello
+
+    //  1.- Initialize population
+    //      1a. Generate random individuals to fill Q
+
+    std::cout << "Generate random individuals to fill Q" << std::endl;
+
+    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+
+                rand_route_node = (int) (rand() % nodes);
+                // Constraint: No loops and no repetitions        
+                if((*jt).empty()){
+                    *kt = rand_route_node;
+                }
+                else{
+                    // Force feasible solutions
+                    if(!is_in(rand_route_node, *jt)){
+                        int i;
+                        for(i=0; i<5; i++){
+                            if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
+                                && !is_in(rand_route_node, *jt)){
+                                *kt = rand_route_node;
+                                break;
+                            }
+                            rand_route_node = (int) (rand() % nodes);
+                        }
+
+                        if(i == 5){
+                            int j;
+                            for(j=0; j<nodes; j++){
+                                if(!is_in(j, *jt) && time_matrix[*(kt-1)][j] != EMPTY){
+                                    *kt = j;
+                                    break;
+                                }
+                            }
+                            if(j == nodes){
+                                (*jt).erase(kt);
+                                kt--;
+                            }
+                        }
+                        
+                    }
+                    else{
+                        --kt;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void solution::setDemandMatrix(int** dmatrix){
@@ -438,6 +466,7 @@ void solution::calculate(int iter){
 
     //      1b. Store the best individuals in Ag
     Ag = Q;
+
 
     for(SolIter it=Q.begin(); it != Q.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){

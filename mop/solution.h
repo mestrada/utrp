@@ -35,6 +35,7 @@ class solution
         void setDemandMatrix(int **);
         void setTimeMatrix(int **);
         void calculate(int);
+        void generateRandomIndividuals(void);
     private:
         int pop_size;
         int routes;
