@@ -1,6 +1,16 @@
 #include "Graph.h"
+#include <iterator>     // std::next
 
 using namespace std;
+
+template <typename ForwardIt>
+ForwardIt next(ForwardIt it, 
+               typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+{
+    std::advance(it, n);
+    return it;
+}
+
 
 Graph::Graph(){}
 
@@ -52,14 +62,14 @@ void Graph::initialize()
     for(int i=0;i<numOfVertices;i++) {
         mark[i] = false;
         predecessor[i] = -1;
-        distance[i] = INFINITY;
+        distance[i] = MAXDIST;
     }
     distance[source] = 0;
 }
 
 int Graph::getClosestUnmarkedNode()
 {
-    int minDistance = INFINITY;
+    int minDistance = MAXDIST;
     int closestUnmarkedNode;
     for(int i=0;i<numOfVertices;i++) {
         if((!mark[i]) && ( minDistance >= distance[i])) {
@@ -73,7 +83,7 @@ return closestUnmarkedNode;
 void Graph::dijkstra()
 {
     initialize();
-    int minDistance = INFINITY;
+    int minDistance = MAXDIST;
     int closestUnmarkedNode;
     int count = 0;
     while(count < numOfVertices) {
@@ -97,9 +107,10 @@ void Graph::printPath(int node, int parent)
         //cout<<node+1<<"..";
         insert_node(parent, node);
     }
-    else if(predecessor[node] == -1)
-        cout<<"No path from "<<source<<"to "<<node<<endl;
-    //TODO: Clean Route
+    else if(predecessor[node] == -1){
+        //cout<<"No path from "<<source<<"to "<<node<<endl;
+        //TODO: Clean Route
+        }
         else {
             printPath(predecessor[node], parent);
             //cout<<node+1<<"..";
@@ -107,7 +118,7 @@ void Graph::printPath(int node, int parent)
         }
 }
 
-void Graph::output()
+void Graph::SetPaths()
 {
     for(int i=0;i<numOfVertices;i++) {
         if(i == source){}
@@ -164,61 +175,24 @@ void Graph::print_sol(){
     }
 
 }
-/*
-int main()
-{
-Graph G;
-G.read(m_tt);
-G.set_source(1);
-G.dijkstra();
-G.output();
-return 0;
+
+
+void Graph::fill_matrix(int** &mat, int source){
+    for(int i=0; i<numOfVertices; i++){
+
+        int cost = 0;
+        int index = 0;
+
+        for(list<int>::iterator it=short_routes[i].begin(); it!=short_routes[i].end(); it++){
+
+            if(index != short_routes[i].size() - 1){
+                cost += adjMatrix[*it][*(next(short_routes[i].begin(), index + 1))] ;
+            }
+            index++;
+        }
+
+        /*mat[source][i] = cost;*/
+        if(cost != 0)
+            mat[i][source] = cost;
+    }
 }
-*/
-/*Sample output:
-
-[vinod@thelegendbox cpp]$ g++ dijkstra.cpp
-[vinod@thelegendbox cpp]$ ./a.out
-Enter the number of vertices of the graph(should be > 0)
-5
-Enter the adjacency matrix for the graph
-To enter infinity enter 999
-Enter the (+ve)weights for the row 0
-0
-2
-4
-999
-1
-Enter the (+ve)weights for the row 1
-2
-0
-7
-3
-999
-Enter the (+ve)weights for the row 2
-4
-7
-0
-2
-999
-Enter the (+ve)weights for the row 3
-999
-3
-2
-0
-6
-Enter the (+ve)weights for the row 4
-1
-999
-999
-6
-0
-Enter the source vertex
-0
-0..0->0
-0..1..->2
-0..2..->4
-0..1..3..->5
-0..4..->1
-
-*/

@@ -27,7 +27,7 @@ dijkstra()                    : This method will implement the dijkstra’s algo
 
 #include <iostream>
 #include <list>
-#define INFINITY 999
+#define MAXDIST 999
 using namespace std;
 
 class Graph
@@ -39,6 +39,7 @@ bool *mark;
 int source;
 int numOfVertices;
 list<int>  *short_routes;
+int** cost_matrix;
 public:
 Graph();
 Graph(int n);
@@ -48,12 +49,13 @@ void set_source(int);
 void initialize();
 int getClosestUnmarkedNode();
 void dijkstra();
-void output();
+void SetPaths();
 void printPath(int, int);
 void print_deb();
 void insert_node(int, int);
 int fill_set(int **, int, int, int);
 void print_sol();
+void fill_matrix(int** &, int);
 };
 
 
