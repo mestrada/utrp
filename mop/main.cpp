@@ -80,8 +80,8 @@ int main (int argc, char **argv)
     matrix time_matrix(n_nodes);
     time_matrix.load(&file_path_time_matrix[0]);
 
-    demand_matrix.print();
-    time_matrix.print();
+    //demand_matrix.print();
+    //time_matrix.print();
 
     solution sol (population, number_routes, n_nodes, min_length,
         max_length, mutation_prob, seed);
@@ -90,7 +90,7 @@ int main (int argc, char **argv)
     
     sol.setTimeMatrix(time_matrix.getMatrix());
     sol.generateRandomIndividuals();
-    sol.print();
+    //sol.print();
     sol.calculate(max_iter);
 
     // Solution = Set of N routes

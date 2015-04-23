@@ -10,6 +10,25 @@
 #include <math.h> 
 
 
+double HyperVolume(Individuals sorted_set){
+
+    long hypervolume = 0;
+
+    int prev_ocost = 3000;
+
+    int refop = 3000;
+    int refpas = 100;
+
+    for(IndIter it=sorted_set.begin(); it != sorted_set.end(); ++it){
+        hypervolume += (prev_ocost - it->ocost) * (refpas - it->pcost);
+        prev_ocost = it->ocost;
+
+    }
+
+    std::cout << "HyperVolume = " << hypervolume << std::endl;
+}
+
+
 bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
 bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
 
@@ -438,10 +457,11 @@ void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
         ind_ref[sol_number_aux] = evaluateCosts(*it, sol_number_aux);
         sol_number_aux++;
     }
+}
 
+void solution::printActualValues(void){
     for(int i=0; i< pop_size; i++)
         std::cout << "Value for sol " << i << ":\t" << current_values[i].ocost << " | " << current_values[i].pcost << std::endl;
-
 }
 
 void solution::clone(int ndo, int ndp){
@@ -483,6 +503,11 @@ void solution::calculate(int iter){
     current_time_matrix = time_matrix;
 
     evaluateAllCosts(Ag, current_values);
+    printActualValues();
+
+
+    std::sort(current_values.begin(), current_values.end(), SortbyPassenger);
+    HyperVolume(current_values);
 
     while(iteration < iter){
         ResetCostMatrix();
@@ -517,7 +542,7 @@ void solution::calculate(int iter){
         // Non-dominated Passenger cost
         ndp_idx = getNonDominatedByPassengerCost();
 
-        std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
+        //std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
 
         //clone
 
@@ -528,7 +553,7 @@ void solution::calculate(int iter){
         //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
 
         mutation_type = (double) rand() / RAND_MAX;
-        if(mutation_type < 0.7)
+        if(mutation_type < 0.5)
             mutateChange(mutation_prob);
         else
             mutateResize(mutation_prob, minlength, maxlength);
@@ -550,8 +575,13 @@ void solution::calculate(int iter){
         iteration++;
     }
     std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
-    printAntigens();
+    //printAntigens();
     evaluateAllCosts(Ag, current_values);
+    printActualValues();
+
+    std::sort(current_values.begin(), current_values.end(), SortbyPassenger);
+    HyperVolume(current_values);
+    
 
 }
 

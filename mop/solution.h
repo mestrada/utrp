@@ -23,6 +23,7 @@ typedef struct individual
 }ind;
 
 typedef std::vector<individual> Individuals;
+typedef std::vector<individual>::iterator IndIter;
 
 class solution
 {
@@ -36,6 +37,7 @@ class solution
         void setTimeMatrix(int **);
         void calculate(int);
         void generateRandomIndividuals(void);
+        void printActualValues(void);
     private:
         int pop_size;
         int routes;
