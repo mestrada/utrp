@@ -90,7 +90,7 @@ int main (int argc, char **argv)
     
     sol.setTimeMatrix(time_matrix.getMatrix());
     sol.generateRandomIndividuals();
-    //sol.print();
+    sol.print();
     sol.calculate(max_iter);
 
     // Solution = Set of N routes

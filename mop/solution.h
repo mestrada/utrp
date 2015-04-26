@@ -20,6 +20,7 @@ typedef struct individual
 {
     double ocost; // Operator cost
     double pcost; // Passenger cost
+    int index;
 }ind;
 
 typedef std::vector<individual> Individuals;

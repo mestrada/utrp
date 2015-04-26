@@ -31,6 +31,7 @@ double HyperVolume(Individuals sorted_set){
 
 bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
 bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
+//bool SortByHyperVolume(individuals i, Individuals j) { return HyperVolume(i) > HyperVolume(j)}
 
 solution::solution(int population, int n_routes, int n_nodes, int minlen,
     int maxlen, double mutation_prob, unsigned seed):
@@ -50,17 +51,19 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
 
     // Q set of solutions
     Q = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
-
     // Ab Antibodies set
     Ab = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
-
     // Ag Antigens set
     Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
     // P pool of clones
     P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
+    // Auxiliar Antigens set
+    // current_Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
 
     current_values = Individuals(pop_size);
     pool_values = Individuals(2 * pop_size);
+
+    //current_antigens = Individuals(pop_size);
 }
 
 solution::~solution(){
@@ -422,6 +425,7 @@ individual solution::evaluateCosts(Routes current_routes, int number){
 
     ind_eval.ocost = op_cost;
     ind_eval.pcost = pass_cost;
+    ind_eval.index = number;
 
     return ind_eval;
 }
@@ -544,7 +548,6 @@ void solution::calculate(int iter){
 
         //std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
 
-        //clone
 
         clone(ndo_idx, ndp_idx);
 
@@ -563,19 +566,19 @@ void solution::calculate(int iter){
         std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
 
         for(int i=0; i< floor(pop_size / 2); i++){
-            Ag[i] = P[i];
+            Ag[i] = P[pool_values[i].index];
         }
 
         std::sort(pool_values.begin(), pool_values.end(), SortbyPassenger);
 
         for(int i=0; i< floor(pop_size / 2); i++){
-            Ag[i + floor(pop_size / 2)] = P[i];
+            Ag[i + floor(pop_size / 2)] = P[pool_values[i].index];
         }
 
         iteration++;
     }
     std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
-    //printAntigens();
+    printAntigens();
     evaluateAllCosts(Ag, current_values);
     printActualValues();
 
