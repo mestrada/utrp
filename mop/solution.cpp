@@ -26,8 +26,9 @@ double HyperVolume(Individuals sorted_set){
     }
 
     std::cout << "HyperVolume = " << hypervolume << std::endl;
-}
 
+    return hypervolume;
+}
 
 bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
 bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
@@ -563,7 +564,65 @@ void solution::calculate(int iter){
 
         evaluateAllCosts(P, pool_values);
 
-        std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
+        double max_hv = 0.0;
+        double current_hv = 0.0;
+        int current_idx = 0;
+        Individuals current_sol;
+        Individuals best_sol;
+
+        std::vector<int> best_ag;
+        std::vector<int> current_ag;
+
+        for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
+
+            for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
+                std::cout << *i << ' ';
+            std::cout << std::endl;
+
+            if(current_ag.size() < pop_size){
+                current_ag.push_back(current_idx);
+                best_ag = current_ag;
+            }
+            else{
+                best_sol.clear();
+                current_sol.clear();
+
+                for(int i=0; i<current_ag.size(); i++){
+                    current_ag[i] = current_idx;
+
+                    for(int j=0; j<best_ag.size(); j++){
+                        best_sol.push_back(pool_values[best_ag[j]]);
+                    }
+                    for(int j=0; j<current_ag.size(); j++){
+                        current_sol.push_back(pool_values[current_ag[j]]);
+                    }
+
+                    std::sort(best_sol.begin(), best_sol.end(), SortbyPassenger);
+                    std::sort(current_sol.begin(), current_sol.end(), SortbyPassenger);
+                    max_hv = HyperVolume(best_sol);
+                    current_hv = HyperVolume(current_sol);
+
+                    std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
+
+                    if(max_hv > current_hv){
+                        current_ag = best_ag;
+                    }
+                    else{
+                        best_ag = current_ag;
+                        break;
+                    }
+
+                }
+            }
+
+            current_idx++;
+        }
+
+        for(int i=0; i<best_ag.size(); i++){
+            Ag[i] = P[pool_values[best_ag[i]].index];
+        }
+
+        /*std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
 
         for(int i=0; i< floor(pop_size / 2); i++){
             Ag[i] = P[pool_values[i].index];
@@ -573,7 +632,7 @@ void solution::calculate(int iter){
 
         for(int i=0; i< floor(pop_size / 2); i++){
             Ag[i + floor(pop_size / 2)] = P[pool_values[i].index];
-        }
+        }*/
 
         iteration++;
     }
