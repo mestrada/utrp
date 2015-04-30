@@ -7,7 +7,7 @@
 
 #define EMPTY -1
 #define INF 100
-
+#define MUTATION_TYPE_DIST 0.5
 
 typedef std::vector<int> Route;
 typedef std::vector<Route> Routes;

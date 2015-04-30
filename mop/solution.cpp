@@ -10,7 +10,7 @@
 #include <math.h> 
 
 
-double HyperVolume(Individuals sorted_set){
+double HyperVolume(Individuals sorted_set, bool output){
 
     long hypervolume = 0;
 
@@ -24,13 +24,14 @@ double HyperVolume(Individuals sorted_set){
         prev_ocost = it->ocost;
 
     }
-
-    std::cout << "HyperVolume = " << hypervolume << std::endl;
+    if(output)
+        std::cout << "HyperVolume = " << hypervolume << std::endl;
 
     return hypervolume;
 }
 
 bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
+bool SortbyOperatorReverse(individual i, individual j) { return i.ocost > j.ocost; };
 bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
 //bool SortByHyperVolume(individuals i, Individuals j) { return HyperVolume(i) > HyperVolume(j)}
 
@@ -121,6 +122,12 @@ void solution::printAntigens(){
     for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         std::cout << "Solution # " << sol_n << std::endl;
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            if(is_feasible(&(*jt))) {
+                std::cout << "Feasible" << std::endl;
+            }
+            else{
+                std::cout << "Unfeasible" << std::endl;
+            }
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
                 std::cout << *kt << "\t";
             }
@@ -511,8 +518,8 @@ void solution::calculate(int iter){
     printActualValues();
 
 
-    std::sort(current_values.begin(), current_values.end(), SortbyPassenger);
-    HyperVolume(current_values);
+    std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
+    HyperVolume(current_values, true);
 
     while(iteration < iter){
         ResetCostMatrix();
@@ -557,7 +564,7 @@ void solution::calculate(int iter){
         //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
 
         mutation_type = (double) rand() / RAND_MAX;
-        if(mutation_type < 0.5)
+        if(mutation_type < MUTATION_TYPE_DIST)
             mutateChange(mutation_prob);
         else
             mutateResize(mutation_prob, minlength, maxlength);
@@ -575,9 +582,9 @@ void solution::calculate(int iter){
 
         for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
 
-            for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
+            /*for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
                 std::cout << *i << ' ';
-            std::cout << std::endl;
+            std::cout << std::endl;*/
 
             if(current_ag.size() < pop_size){
                 current_ag.push_back(current_idx);
@@ -597,12 +604,12 @@ void solution::calculate(int iter){
                         current_sol.push_back(pool_values[current_ag[j]]);
                     }
 
-                    std::sort(best_sol.begin(), best_sol.end(), SortbyPassenger);
-                    std::sort(current_sol.begin(), current_sol.end(), SortbyPassenger);
-                    max_hv = HyperVolume(best_sol);
-                    current_hv = HyperVolume(current_sol);
+                    std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
+                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
+                    max_hv = HyperVolume(best_sol, false);
+                    current_hv = HyperVolume(current_sol, false);
 
-                    std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
+                    //std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
 
                     if(max_hv > current_hv){
                         current_ag = best_ag;
@@ -641,8 +648,16 @@ void solution::calculate(int iter){
     evaluateAllCosts(Ag, current_values);
     printActualValues();
 
-    std::sort(current_values.begin(), current_values.end(), SortbyPassenger);
-    HyperVolume(current_values);
+    std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
+    HyperVolume(current_values, true);
+
+/*    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            if(is_feasible(&(*jt))) {
+
+            }
+        }
+    }*/
     
 
 }
