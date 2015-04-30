@@ -36,10 +36,10 @@ bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
 //bool SortByHyperVolume(individuals i, Individuals j) { return HyperVolume(i) > HyperVolume(j)}
 
 solution::solution(int population, int n_routes, int n_nodes, int minlen,
-    int maxlen, double mutation_prob, unsigned seed):
+    int maxlen, double mutation_prob, unsigned seed, double threshold):
     pop_size(population), routes(n_routes), nodes(n_nodes),
     minlength(minlen), maxlength(maxlen), mutation_prob(mutation_prob),
-    seed(seed){
+    seed(seed), threshold(threshold){
 
     int rand_route_node;
 
@@ -415,7 +415,7 @@ double solution::RouteOperatorCost(std::vector<int>* s){
                 }
             }
         }
-    //std::cout << "Route Operator Cost: " << fo_value << std::endl;
+    std::cout << "Route Operator Cost: " << fo_value << std::endl;
 
     return fo_value;
 }
@@ -463,10 +463,13 @@ int solution::getNonDominatedByPassengerCost(void){
 }
 
 void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
-
+    std::cout << "Evaluate All Costs" << std::endl; 
     int sol_number_aux = 0;
+    individual aux_cost;
     for(SolIter it=sol_ref.begin(); it != sol_ref.end(); ++it){
-        ind_ref[sol_number_aux] = evaluateCosts(*it, sol_number_aux);
+        aux_cost = evaluateCosts(*it, sol_number_aux);
+        ind_ref[sol_number_aux] = aux_cost;
+        std::cout << "Sol " << sol_number_aux << ": " << aux_cost.ocost << " | " << aux_cost.pcost << std::endl;
         sol_number_aux++;
     }
 }
@@ -517,11 +520,13 @@ void solution::calculate(int iter){
     evaluateAllCosts(Ag, current_values);
     printActualValues();
 
+    double initial_hv = 0.0;
+    double ref_hv = 0.0;
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-    HyperVolume(current_values, true);
+    initial_hv = HyperVolume(current_values, true);
 
-    while(iteration < iter){
+    while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
         ResetCostMatrix();
 
         int sol_number = 0;
@@ -640,10 +645,19 @@ void solution::calculate(int iter){
         for(int i=0; i< floor(pop_size / 2); i++){
             Ag[i + floor(pop_size / 2)] = P[pool_values[i].index];
         }*/
-
+        printAntigens();
+        evaluateAllCosts(Ag, current_values);
+        std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
+        printActualValues();
+        ref_hv = HyperVolume(current_values, true);
         iteration++;
     }
+
+
     std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
+    std::cout << "\n--------\n--------\n" << std::endl;
+    std::cout << "N iterations: " << iteration << std::endl;
+    std::cout << "Ref HV: " << ref_hv << std::endl;
     printAntigens();
     evaluateAllCosts(Ag, current_values);
     printActualValues();

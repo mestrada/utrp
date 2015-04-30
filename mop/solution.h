@@ -30,7 +30,7 @@ class solution
 {
     public:
         
-        solution(int, int, int, int, int, double, unsigned);
+        solution(int, int, int, int, int, double, unsigned, double);
         ~solution();
         bool is_in(int, std::vector<int>);
         void print();
@@ -47,6 +47,7 @@ class solution
         int maxlength;
         double mutation_prob;
         unsigned seed;
+        double threshold;
 
         Individuals current_values;
         Individuals pool_values;

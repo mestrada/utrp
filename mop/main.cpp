@@ -28,13 +28,14 @@ int main (int argc, char **argv)
     int max_iter;
     int population;
     double mutation_prob;
+    double threshold;
     unsigned seed;
 
     /*
     Arguments parsing
         instance_name n_nodes n_routes min_len max_len mutation_prob max_iter population seed
 
-        1 15 5 2 10 0.3 100 10 12345
+        1 15 5 2 10 0.3 100 10 12345 0.1
     */
     if(argc > 8){
 
@@ -49,6 +50,8 @@ int main (int argc, char **argv)
         max_iter = atoi(argv[7]);
         population = atoi(argv[8]);
         seed = (unsigned) atoi(argv[9]);
+        threshold = (double) atof(argv[10]);
+
 
         file_path_demand_matrix = input_path_1.str();
         file_path_time_matrix = input_path_2.str();
@@ -65,6 +68,7 @@ int main (int argc, char **argv)
         std::cout << "Maximum iterations:\t" << argv[7] << std::endl;
         std::cout << "Population size:\t" << argv[8] << std::endl;
         std::cout << "Seed:\t\t\t" << argv[9] << std::endl;
+        std::cout << "Threshold:\t\t" << argv[10] << std::endl;
 
     }
      else{
@@ -84,7 +88,7 @@ int main (int argc, char **argv)
     //time_matrix.print();
 
     solution sol (population, number_routes, n_nodes, min_length,
-        max_length, mutation_prob, seed);
+        max_length, mutation_prob, seed, threshold);
 
     sol.setDemandMatrix(demand_matrix.getMatrix());
     
