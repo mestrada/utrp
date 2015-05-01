@@ -80,6 +80,7 @@ class solution
         int getNonDominatedByOperatorCost(void);
         int getNonDominatedByPassengerCost(void);
         void clone(int, int);
+        void calculateCostMatrix(Solutions);
 };
 #endif
 

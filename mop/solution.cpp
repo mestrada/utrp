@@ -415,7 +415,7 @@ double solution::RouteOperatorCost(std::vector<int>* s){
                 }
             }
         }
-    std::cout << "Route Operator Cost: " << fo_value << std::endl;
+    //std::cout << "Route Operator Cost: " << fo_value << std::endl;
 
     return fo_value;
 }
@@ -463,13 +463,13 @@ int solution::getNonDominatedByPassengerCost(void){
 }
 
 void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
-    std::cout << "Evaluate All Costs" << std::endl; 
+    //std::cout << "Evaluate All Costs" << std::endl; 
     int sol_number_aux = 0;
     individual aux_cost;
     for(SolIter it=sol_ref.begin(); it != sol_ref.end(); ++it){
         aux_cost = evaluateCosts(*it, sol_number_aux);
         ind_ref[sol_number_aux] = aux_cost;
-        std::cout << "Sol " << sol_number_aux << ": " << aux_cost.ocost << " | " << aux_cost.pcost << std::endl;
+        //std::cout << "Sol " << sol_number_aux << ": " << aux_cost.ocost << " | " << aux_cost.pcost << std::endl;
         sol_number_aux++;
     }
 }
@@ -491,6 +491,28 @@ void solution::clone(int ndo, int ndp){
             else
                 P[i] = Ag[ndp];
         }
+    }
+}
+
+void solution::calculateCostMatrix(Solutions sol_set){
+    int sol_number = 0;
+
+    for(SolIter it=sol_set.begin(); it != sol_set.end(); ++it){
+            
+        setCurrentTimeMatrix(*it);
+
+        for(int i=0; i<nodes; i++){
+            Graph G(nodes);
+            G.read(current_time_matrix);
+            G.set_source(i);
+            G.dijkstra();
+            G.SetPaths();
+            G.fill_matrix(costMatrix, i);
+        }
+        //std::cout << "Total cost for sol: " << sol_number << std::endl;
+        //evaluateAllCosts();
+        //evaluateCosts(*it, sol_number);
+        sol_number++;
     }
 }
 
@@ -529,27 +551,9 @@ void solution::calculate(int iter){
     while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
         ResetCostMatrix();
 
-        int sol_number = 0;
-
         //printAntigens();
 
-        for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
-            
-            setCurrentTimeMatrix(*it);
-
-            for(int i=0; i<nodes; i++){
-                Graph G(nodes);
-                G.read(current_time_matrix);
-                G.set_source(i);
-                G.dijkstra();
-                G.SetPaths();
-                G.fill_matrix(costMatrix, i);
-            }
-            //std::cout << "Total cost for sol: " << sol_number << std::endl;
-            //evaluateAllCosts();
-            //evaluateCosts(*it, sol_number);
-            sol_number++;
-        }
+        calculateCostMatrix(Ag);
 
         evaluateAllCosts(Ag, current_values);
 
@@ -574,6 +578,7 @@ void solution::calculate(int iter){
         else
             mutateResize(mutation_prob, minlength, maxlength);
 
+        calculateCostMatrix(P);
         evaluateAllCosts(P, pool_values);
 
         double max_hv = 0.0;
@@ -645,11 +650,12 @@ void solution::calculate(int iter){
         for(int i=0; i< floor(pop_size / 2); i++){
             Ag[i + floor(pop_size / 2)] = P[pool_values[i].index];
         }*/
-        printAntigens();
+        //printAntigens();
+        calculateCostMatrix(Ag);
         evaluateAllCosts(Ag, current_values);
         std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-        printActualValues();
-        ref_hv = HyperVolume(current_values, true);
+        //printActualValues();
+        ref_hv = HyperVolume(current_values, false);
         iteration++;
     }
 
@@ -659,6 +665,7 @@ void solution::calculate(int iter){
     std::cout << "N iterations: " << iteration << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;
     printAntigens();
+    calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     printActualValues();
 
