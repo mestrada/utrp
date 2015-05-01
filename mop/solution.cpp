@@ -214,6 +214,13 @@ void solution::setTimeMatrix(int** tmatrix){
     time_matrix = tmatrix;
 }
 
+void solution::DestroyMatrix(int** &m){
+    for(int i =0; i < nodes; i++){
+        free(m[i]);
+    }
+    free(m);
+}
+
 void solution::InitializeMatrix(int** &m){
     m = (int**)malloc(nodes*sizeof(int*));
     for(int i =0; i < nodes; i++){
@@ -533,7 +540,7 @@ void solution::calculate(int iter){
         }
     }
 
-    //InitializeMatrix(current_time_matrix);
+    InitializeMatrix(current_time_matrix);
 
     InitializeCostMatrix();
 
@@ -556,6 +563,7 @@ void solution::calculate(int iter){
         calculateCostMatrix(Ag);
 
         evaluateAllCosts(Ag, current_values);
+        //DestroyMatrix(current_time_matrix);
 
         int ndo_idx, ndp_idx;
         // Non-dominated Operator cost
@@ -578,8 +586,10 @@ void solution::calculate(int iter){
         else
             mutateResize(mutation_prob, minlength, maxlength);
 
+        DestroyMatrix(current_time_matrix);
         calculateCostMatrix(P);
         evaluateAllCosts(P, pool_values);
+        DestroyMatrix(current_time_matrix);
 
         double max_hv = 0.0;
         double current_hv = 0.0;
@@ -653,10 +663,16 @@ void solution::calculate(int iter){
         //printAntigens();
         calculateCostMatrix(Ag);
         evaluateAllCosts(Ag, current_values);
+        DestroyMatrix(current_time_matrix);
         std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
         //printActualValues();
         ref_hv = HyperVolume(current_values, false);
         iteration++;
+
+        Individuals().swap(current_sol);
+        Individuals().swap(best_sol);
+        std::vector<int>().swap(best_ag);
+        std::vector<int>().swap(current_ag);
     }
 
 
@@ -667,6 +683,7 @@ void solution::calculate(int iter){
     printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
+    DestroyMatrix(current_time_matrix);
     printActualValues();
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);

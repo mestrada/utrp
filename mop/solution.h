@@ -71,6 +71,7 @@ class solution
         void mutateChange(double);
         void mutateResize(double, int, int);
         individual evaluateCosts(Routes, int);
+        void DestroyMatrix(int** &m);
         void InitializeMatrix(int** &);
         void ResetMatrix(int** &);
         void InitializeCostMatrix(void);
