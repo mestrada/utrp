@@ -56,19 +56,21 @@ int main (int argc, char **argv)
         file_path_demand_matrix = input_path_1.str();
         file_path_time_matrix = input_path_2.str();
 
-        std::cout << "================================" << std::endl;
-        std::cout << "Using the following parameters:" << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "Instance Name:\t\t" << argv[1] << std::endl;
-        std::cout << "Number of Nodes:\t" << argv[2] << std::endl;
-        std::cout << "Number of Routes:\t" << argv[3] << std::endl;
-        std::cout << "Minimum route lenght:\t" << argv[4] << std::endl;
-        std::cout << "Maximum route lenght:\t" << argv[5] << std::endl;
-        std::cout << "Mutation Probability:\t" << argv[6] << std::endl;
-        std::cout << "Maximum iterations:\t" << argv[7] << std::endl;
-        std::cout << "Population size:\t" << argv[8] << std::endl;
-        std::cout << "Seed:\t\t\t" << argv[9] << std::endl;
-        std::cout << "Threshold:\t\t" << argv[10] << std::endl;
+        //std::cout << "================================" << std::endl;
+        //std::cout << "Using the following parameters:" << std::endl;
+        //std::cout << "--------------------------------" << std::endl;
+        std::cout << "==" << std::endl;
+        std::cout << "Instance Name:" << argv[1] << std::endl;
+        std::cout << "Number of Nodes:" << argv[2] << std::endl;
+        std::cout << "Number of Routes:" << argv[3] << std::endl;
+        std::cout << "Minimum route lenght:" << argv[4] << std::endl;
+        std::cout << "Maximum route lenght:" << argv[5] << std::endl;
+        std::cout << "Mutation Probability:" << argv[6] << std::endl;
+        std::cout << "Maximum iterations:" << argv[7] << std::endl;
+        std::cout << "Population size:" << argv[8] << std::endl;
+        std::cout << "Seed:" << argv[9] << std::endl;
+        std::cout << "Threshold:" << argv[10] << std::endl;
+        std::cout << "--" << std::endl;
 
     }
      else{
@@ -94,7 +96,7 @@ int main (int argc, char **argv)
     
     sol.setTimeMatrix(time_matrix.getMatrix());
     sol.generateRandomIndividuals();
-    sol.print();
+    //sol.print();
     sol.calculate(max_iter);
 
     // Solution = Set of N routes

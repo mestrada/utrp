@@ -35,7 +35,7 @@ matrix::~matrix() {
 
 void matrix::load(char *input_file){
     ifstream data;
-    cout << "Loading file: " << input_file << endl;
+    //cout << "Loading file: " << input_file << endl;
     data.open(input_file);
     m = (int**)malloc(n_nodes*sizeof(int*));
     for(int i =0; i < n_nodes; i++){

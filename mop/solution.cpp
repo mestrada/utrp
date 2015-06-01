@@ -158,7 +158,7 @@ void solution::generateRandomIndividuals(void){
     //  1.- Initialize population
     //      1a. Generate random individuals to fill Q
 
-    std::cout << "Generate random individuals to fill Q" << std::endl;
+    //std::cout << "Generate random individuals to fill Q" << std::endl;
 
     for(SolIter it=Q.begin(); it != Q.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
@@ -547,7 +547,7 @@ void solution::calculate(int iter){
     current_time_matrix = time_matrix;
 
     evaluateAllCosts(Ag, current_values);
-    printActualValues();
+    //printActualValues();
 
     double initial_hv = 0.0;
     double ref_hv = 0.0;
@@ -676,15 +676,15 @@ void solution::calculate(int iter){
     }
 
 
-    std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
+    /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
-    std::cout << "N iterations: " << iteration << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;
-    printAntigens();
+    printAntigens();*/
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     DestroyMatrix(current_time_matrix);
-    printActualValues();
+    std::cout << "Executed iterations: " << iteration << std::endl;
+    //printActualValues();
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
