@@ -260,17 +260,46 @@ void solution::ResetCostMatrix(void){
 
 void solution::setCurrentTimeMatrix(Routes current_routes){
 
+    /*std::cout << "CT CHECK 1"<< std::endl;*/
     InitializeMatrix(current_time_matrix);
+    /*std::cout << "CT CHECK 2"<< std::endl;*/
     ResetMatrix(current_time_matrix);
 
     for(RoutesIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
-        for(RouteIter kt=(*jt).begin(); kt != (*jt).end() - 1; ++kt){
-
-            current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];
+        /*std::cout << "CT CHECK 3"<< std::endl;*/
+        for(RouteIter kt=(*jt).begin(); (kt != (*jt).end() - 1 && kt != (*jt).end()); ++kt){
+            /*std::cout << "CT CHECK 4 --"<< std::endl;*/
+            /*std::cout << "values " << *kt << " | " << *(kt+1) << std::endl;
+            std::cout << "CM values " << current_time_matrix[*kt][*(kt + 1)] << std::endl;
+            std::cout << "TM values " << time_matrix[*kt][*(kt + 1)] << std::endl;
+            current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];*/
+            /*std::cout << "CT CHECK 5"<< std::endl;*/
             current_time_matrix[*(kt + 1)][*kt] = time_matrix[*(kt + 1)][*kt];
         }
     }
 
+}
+
+bool solution::isDominated(double ocost, double pcost){
+    for(int i=1; i<pop_size; i++){
+        if(current_values[i].ocost <=  ocost  && current_values[i].pcost < pcost){
+                return true;
+            }
+        if(current_values[i].ocost <  ocost  && current_values[i].pcost <= pcost){
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<int> solution::getNonDominated(void){
+    int min_idx = 0;
+    std::vector<int> non_dominated;
+    for(int i=1; i<pop_size; i++){
+        if(!isDominated(current_values[i].ocost, current_values[i].pcost))
+            non_dominated.push_back(i);
+    }
+    return non_dominated;
 }
 
 void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
@@ -281,14 +310,23 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     int rand_route_node;
     int rand_idx;
 
+    /*std::cout << "CHECK MR 1" << std::endl;*/
     for(SolIter it=P.begin(); it != P.end(); ++it){
+        /*std::cout << "CHECK MR 2" << std::endl;*/
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+            /*std::cout << "CHECK MR 3" << std::endl;*/
             p = (double) rand() / RAND_MAX;
 
             if(p < mutate_prob){
+                /*std::cout << "CHECK MR 4" << std::endl;*/
+                /*std::cout << "CHECK MR V " << (*jt).size() <<  std::endl;*/
+                if ((*jt).size() == 0)
+                    break;
                 rand_idx = rand() % (*jt).size();
+                /*std::cout << "CHECK MR 4ii" << std::endl;*/
                 mutation_t = (int) rand() % 2;
                 if(mutation_t != 1){
+                    /*std::cout << "CHECK MR 5a" << std::endl;*/
                     // Add node
                     if((*jt).size() == maxLen)
                         continue;
@@ -299,6 +337,7 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
                     jt->insert(jt->begin() + rand_idx, rand_route_node);
                 }
                 else{
+                    /*std::cout << "CHECK MR 5b" << std::endl;*/
                     // Remove node
                     if ((*jt).size() == minLen)
                         continue;
@@ -508,13 +547,30 @@ void solution::clone(int ndo, int ndp){
     }
 }
 
+
+void solution::clone(std::vector<int> ndo){
+    
+    int counter = 0;
+
+    while(counter < 2 * pop_size){
+        for(std::vector<int>::iterator it=ndo.begin(); it != ndo.end(); ++it){
+
+            P[counter] = Ag[*it];
+            counter++;
+            if(counter >= 2 * pop_size){
+                break;
+            }
+        }
+    }
+}
+
 void solution::calculateCostMatrix(Solutions sol_set){
     int sol_number = 0;
-
+    /*std::cout << "CM CHECK 1"<< std::endl;*/
     for(SolIter it=sol_set.begin(); it != sol_set.end(); ++it){
-            
+        /*std::cout << "CM CHECK 2"<< std::endl;*/
         setCurrentTimeMatrix(*it);
-
+        /*std::cout << "CM CHECK 3"<< std::endl;*/
         for(int i=0; i<nodes; i++){
             Graph G(nodes);
             G.read(current_time_matrix);
@@ -523,11 +579,13 @@ void solution::calculateCostMatrix(Solutions sol_set){
             G.SetPaths();
             G.fill_matrix(costMatrix, i);
         }
+        /*std::cout << "CM CHECK 4"<< std::endl;*/
         //std::cout << "Total cost for sol: " << sol_number << std::endl;
         //evaluateAllCosts();
         //evaluateCosts(*it, sol_number);
         sol_number++;
     }
+    /*std::cout << "CM CHECK 5"<< std::endl;*/
 }
 
 void solution::calculate(int iter){
@@ -566,38 +624,54 @@ void solution::calculate(int iter){
         ResetCostMatrix();
 
         //printAntigens();
-
+        /*std::cout << "CHECKPOINT 1"<< std::endl;*/
         calculateCostMatrix(Ag);
-
+        /*std::cout << "CHECKPOINT 2"<< std::endl;*/
         evaluateAllCosts(Ag, current_values);
         //DestroyMatrix(current_time_matrix);
-
+        /*std::cout << "CHECKPOINT 3"<< std::endl;*/
         int ndo_idx, ndp_idx;
+        std::vector<int> nondom;
         // Non-dominated Operator cost
-        ndo_idx = getNonDominatedByOperatorCost();
+
+        nondom = getNonDominated();
         // Non-dominated Passenger cost
-        ndp_idx = getNonDominatedByPassengerCost();
+        /*std::cout << "CHECKPOINT 4"<< std::endl;*/
 
         //std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
 
-
-        clone(ndo_idx, ndp_idx);
-
+        if(nondom.size() > 0){
+            /*std::cout << "CHECKPOINT 5a"<< std::endl;*/
+            clone(nondom);
+        }
+        else{
+            /*std::cout << "CHECKPOINT 5b"<< std::endl;*/
+            ndp_idx = getNonDominatedByPassengerCost();
+            ndo_idx = getNonDominatedByOperatorCost();
+            clone(ndo_idx, ndp_idx);
+        }
+        /*std::cout << "CHECKPOINT 6"<< std::endl;*/
         //mutate
 
         //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
 
         mutation_type = (double) rand() / RAND_MAX;
-        if(mutation_type < MUTATION_TYPE_DIST)
-            mutateChange(mutation_prob);
-        else
-            mutateResize(mutation_prob, minlength, maxlength);
+        if(mutation_type < MUTATION_TYPE_DIST){
+            /*std::cout << "CHECKPOINT 7a"<< std::endl;*/
+            mutateChange(mutation_prob);}
+        else{
+            /*std::cout << "CHECKPOINT 7b"<< std::endl;*/
+            mutateResize(mutation_prob, minlength, maxlength);}
 
+        /*std::cout << "CHECKPOINT 8"<< std::endl;*/
         DestroyMatrix(current_time_matrix);
+        /*std::cout << "CHECKPOINT 9"<< std::endl;*/
         calculateCostMatrix(P);
+        /*std::cout << "CHECKPOINT 10"<< std::endl;*/
         evaluateAllCosts(P, pool_values);
+        /*std::cout << "CHECKPOINT 11"<< std::endl;*/
         DestroyMatrix(current_time_matrix);
-
+        /*std::cout << "CHECKPOINT 12"<< std::endl;*/
         double max_hv = 0.0;
         double current_hv = 0.0;
         int current_idx = 0;
@@ -651,7 +725,7 @@ void solution::calculate(int iter){
 
             current_idx++;
         }
-
+        /*std::cout << "CHECKPOINT 13"<< std::endl;*/
         for(int i=0; i<best_ag.size(); i++){
             Ag[i] = P[pool_values[best_ag[i]].index];
         }
