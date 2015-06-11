@@ -15,15 +15,15 @@ import subprocess
 
 
 SEED = 12803
-ITER = (1000, 5000, 10000)
+ITER = range(1,1000)
 INPUTID = "1"
 N_NODES = "15"
 MIN_LEN = "2"
 MAX_LEN = "7"
-N_ROUTES = (3, 4, 5)
-MUT_PROB = (0.001, 0.002, 0.005, 0.01, 0.02, 0.05)
-POP_SIZE = (5, 10, 20, 50)
-THRESHOLD = (0.25, 0.5, 1.0)
+N_ROUTES = (4, )
+MUT_PROB = (0.002, )
+POP_SIZE = (10, )
+THRESHOLD = (100, )
 
 
 def main():
@@ -41,7 +41,7 @@ def main():
                 for popsize in POP_SIZE:
                     for n_routes in N_ROUTES:
                         for th in THRESHOLD:
-                            for i in range(0, 3):
+                            for i in (1, ):
                                 print "Execution {0}".format(counter)
                                 params = [INPUTID, N_NODES, n_routes, MIN_LEN,
                                 MAX_LEN, mprob, niter, popsize, SEED * i, th]

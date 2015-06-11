@@ -30,6 +30,13 @@ double HyperVolume(Individuals sorted_set, bool output){
     return hypervolume;
 }
 
+void PairCost(Individuals sorted_set){
+    for(IndIter it=sorted_set.begin(); it != sorted_set.end(); ++it){
+        std::cout << "Costs = " << it->ocost << "," << it->pcost << std::endl;
+    }
+
+}
+
 bool SortbyOperator(individual i, individual j) { return i.ocost < j.ocost; };
 bool SortbyOperatorReverse(individual i, individual j) { return i.ocost > j.ocost; };
 bool SortbyPassenger(individual i, individual j) { return i.pcost < j.pcost; };
@@ -688,6 +695,7 @@ void solution::calculate(int iter){
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
+    //PairCost(current_values);
 
 /*    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
