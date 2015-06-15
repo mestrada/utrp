@@ -71,7 +71,7 @@ class solution
         void mutateChange(double);
         void mutateResize(double, int, int);
         individual evaluateCosts(Routes, int);
-        bool isDominated(double, double);
+        bool isDominated(double, double, int);
         std::vector<int> getNonDominated(void);
         void clone(std::vector<int>);
         void DestroyMatrix(int** &m);

@@ -280,8 +280,10 @@ void solution::setCurrentTimeMatrix(Routes current_routes){
 
 }
 
-bool solution::isDominated(double ocost, double pcost){
+bool solution::isDominated(double ocost, double pcost, int index){
     for(int i=1; i<pop_size; i++){
+        if(i == index)
+            continue;
         if(current_values[i].ocost <=  ocost  && current_values[i].pcost < pcost){
                 return true;
             }
@@ -296,7 +298,7 @@ std::vector<int> solution::getNonDominated(void){
     int min_idx = 0;
     std::vector<int> non_dominated;
     for(int i=1; i<pop_size; i++){
-        if(!isDominated(current_values[i].ocost, current_values[i].pcost))
+        if(!isDominated(current_values[i].ocost, current_values[i].pcost, i))
             non_dominated.push_back(i);
     }
     return non_dominated;
