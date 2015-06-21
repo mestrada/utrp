@@ -28,13 +28,14 @@ int main (int argc, char **argv)
     int max_iter;
     int population;
     double mutation_prob;
+    double threshold;
     unsigned seed;
 
     /*
     Arguments parsing
         instance_name n_nodes n_routes min_len max_len mutation_prob max_iter population seed
 
-        1 15 5 2 10 0.3 100 10 12345
+        1 15 5 2 10 0.3 100 10 12345 0.1
     */
     if(argc > 8){
 
@@ -49,22 +50,27 @@ int main (int argc, char **argv)
         max_iter = atoi(argv[7]);
         population = atoi(argv[8]);
         seed = (unsigned) atoi(argv[9]);
+        threshold = (double) atof(argv[10]);
+
 
         file_path_demand_matrix = input_path_1.str();
         file_path_time_matrix = input_path_2.str();
 
-        std::cout << "================================" << std::endl;
-        std::cout << "Using the following parameters:" << std::endl;
-        std::cout << "--------------------------------" << std::endl;
-        std::cout << "Instance Name:\t\t" << argv[1] << std::endl;
-        std::cout << "Number of Nodes:\t" << argv[2] << std::endl;
-        std::cout << "Number of Routes:\t" << argv[3] << std::endl;
-        std::cout << "Minimum route lenght:\t" << argv[4] << std::endl;
-        std::cout << "Maximum route lenght:\t" << argv[5] << std::endl;
-        std::cout << "Mutation Probability:\t" << argv[6] << std::endl;
-        std::cout << "Maximum iterations:\t" << argv[7] << std::endl;
-        std::cout << "Population size:\t" << argv[8] << std::endl;
-        std::cout << "Seed:\t\t\t" << argv[9] << std::endl;
+        //std::cout << "================================" << std::endl;
+        //std::cout << "Using the following parameters:" << std::endl;
+        //std::cout << "--------------------------------" << std::endl;
+        std::cout << "==" << std::endl;
+        std::cout << "Instance Name:" << argv[1] << std::endl;
+        std::cout << "Number of Nodes:" << argv[2] << std::endl;
+        std::cout << "Number of Routes:" << argv[3] << std::endl;
+        std::cout << "Minimum route lenght:" << argv[4] << std::endl;
+        std::cout << "Maximum route lenght:" << argv[5] << std::endl;
+        std::cout << "Mutation Probability:" << argv[6] << std::endl;
+        std::cout << "Maximum iterations:" << argv[7] << std::endl;
+        std::cout << "Population size:" << argv[8] << std::endl;
+        std::cout << "Seed:" << argv[9] << std::endl;
+        std::cout << "Threshold:" << argv[10] << std::endl;
+        std::cout << "--" << std::endl;
 
     }
      else{
@@ -80,17 +86,17 @@ int main (int argc, char **argv)
     matrix time_matrix(n_nodes);
     time_matrix.load(&file_path_time_matrix[0]);
 
-    demand_matrix.print();
-    time_matrix.print();
+    //demand_matrix.print();
+    //time_matrix.print();
 
     solution sol (population, number_routes, n_nodes, min_length,
-        max_length, mutation_prob, seed);
+        max_length, mutation_prob, seed, threshold);
 
     sol.setDemandMatrix(demand_matrix.getMatrix());
     
     sol.setTimeMatrix(time_matrix.getMatrix());
     sol.generateRandomIndividuals();
-    sol.print();
+    //sol.print();
     sol.calculate(max_iter);
 
     // Solution = Set of N routes

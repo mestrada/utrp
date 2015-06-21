@@ -7,7 +7,7 @@
 
 #define EMPTY -1
 #define INF 100
-
+#define MUTATION_TYPE_DIST 0.5
 
 typedef std::vector<int> Route;
 typedef std::vector<Route> Routes;
@@ -20,15 +20,17 @@ typedef struct individual
 {
     double ocost; // Operator cost
     double pcost; // Passenger cost
+    int index;
 }ind;
 
 typedef std::vector<individual> Individuals;
+typedef std::vector<individual>::iterator IndIter;
 
 class solution
 {
     public:
         
-        solution(int, int, int, int, int, double, unsigned);
+        solution(int, int, int, int, int, double, unsigned, double);
         ~solution();
         bool is_in(int, std::vector<int>);
         void print();
@@ -36,6 +38,7 @@ class solution
         void setTimeMatrix(int **);
         void calculate(int);
         void generateRandomIndividuals(void);
+        void printActualValues(void);
     private:
         int pop_size;
         int routes;
@@ -44,6 +47,7 @@ class solution
         int maxlength;
         double mutation_prob;
         unsigned seed;
+        double threshold;
 
         Individuals current_values;
         Individuals pool_values;
@@ -67,6 +71,10 @@ class solution
         void mutateChange(double);
         void mutateResize(double, int, int);
         individual evaluateCosts(Routes, int);
+        bool isDominated(double, double, int);
+        std::vector<int> getNonDominated(void);
+        void clone(std::vector<int>);
+        void DestroyMatrix(int** &m);
         void InitializeMatrix(int** &);
         void ResetMatrix(int** &);
         void InitializeCostMatrix(void);
@@ -76,6 +84,7 @@ class solution
         int getNonDominatedByOperatorCost(void);
         int getNonDominatedByPassengerCost(void);
         void clone(int, int);
+        void calculateCostMatrix(Solutions);
 };
 #endif
 
