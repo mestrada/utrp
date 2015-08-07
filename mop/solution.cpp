@@ -463,13 +463,22 @@ double solution::RouteOperatorCost(std::vector<int>* s){
 
     for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
             if(it != (s->end() -1)){
-                if (current_time_matrix[*it][*(it + 1)] > 0){
+                // std::cout << "it- " << *it << " |it+1- " << *(it+1) << std::endl;
+                // std::cout << "tt- " << current_time_matrix[*it][*(it + 1)] << std::endl;
+                // std::cout << "tt- " << current_time_matrix[*(it + 1)][*it] << std::endl;
+                 if (current_time_matrix[*it][*(it + 1)] > 0){
                     fo_value += current_time_matrix[*it][*(it + 1)];
                 }else{
+
+                    if (current_time_matrix[*(it + 1)][*it] > 0){
+                        fo_value += current_time_matrix[*(it + 1)][*it];}
+                    else{
                     fo_value += INF;
+                    }
                 }
             }
         }
+
     //std::cout << "Route Operator Cost: " << fo_value << std::endl;
 
     return fo_value;
@@ -761,8 +770,8 @@ void solution::calculate(int iter){
 
     /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
-    std::cout << "Ref HV: " << ref_hv << std::endl;
-    printAntigens();*/
+    std::cout << "Ref HV: " << ref_hv << std::endl;*/
+    //printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     DestroyMatrix(current_time_matrix);
@@ -771,7 +780,7 @@ void solution::calculate(int iter){
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
-    //PairCost(current_values);
+    PairCost(current_values);
 
 /*    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
