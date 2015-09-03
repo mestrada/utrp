@@ -8,6 +8,7 @@
 #define EMPTY -1
 #define INF 100
 #define MUTATION_TYPE_DIST 0.5
+#define AFFINITY_PREFERENCE 0.7
 
 typedef std::vector<int> Route;
 typedef std::vector<Route> Routes;
@@ -51,6 +52,7 @@ class solution
 
         Individuals current_values;
         Individuals pool_values;
+        Individuals ag_values;
 
         Solutions Q;
         Solutions Ab;

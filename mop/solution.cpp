@@ -71,6 +71,7 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
 
     current_values = Individuals(pop_size);
     pool_values = Individuals(2 * pop_size);
+    ag_values = Individuals(pop_size);
 
     //current_antigens = Individuals(pop_size);
 }
@@ -449,7 +450,7 @@ double solution::OperatorCost(Routes current_routes){
     }
     
 
-    //std::cout << "Total Operator Cost: " << fo_cost << std::endl;
+    // std::cout << "Total Operator Cost: " << fo_cost << std::endl;
 
     return fo_cost;
 }
@@ -466,12 +467,25 @@ double solution::RouteOperatorCost(std::vector<int>* s){
                 // std::cout << "it- " << *it << " |it+1- " << *(it+1) << std::endl;
                 // std::cout << "tt- " << current_time_matrix[*it][*(it + 1)] << std::endl;
                 // std::cout << "tt- " << current_time_matrix[*(it + 1)][*it] << std::endl;
-                 if (current_time_matrix[*it][*(it + 1)] > 0){
+                 // if (current_time_matrix[*it][*(it + 1)] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
+                if (current_time_matrix[*it][*(it + 1)] > 0){
+                    // if (current_time_matrix[*it][*(it + 1)] > 1000){
+                    //     // std::cout << "ctm " << current_time_matrix[*it][*(it + 1)] << std::endl;
+                    //     std::cout << "x,y: " << *it << "," << *(it + 1) << std::endl;
+                    // }
+                    
                     fo_value += current_time_matrix[*it][*(it + 1)];
                 }else{
 
+                    // if (current_time_matrix[*(it + 1)][*it] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
                     if (current_time_matrix[*(it + 1)][*it] > 0){
-                        fo_value += current_time_matrix[*(it + 1)][*it];}
+                        // if (current_time_matrix[*(it + 1)][*it] > 1000){
+                        //     // std::cout << "ctm " << current_time_matrix[*(it + 1)][*it] << std::endl;    
+                        //     std::cout << "x,y: " << *(it + 1) << "," << *it << std::endl;
+                        // }
+                        
+                        fo_value += current_time_matrix[*(it + 1)][*it];
+                    }
                     else{
                     fo_value += INF;
                     }
@@ -562,11 +576,20 @@ void solution::clone(int ndo, int ndp){
 void solution::clone(std::vector<int> ndo){
     
     int counter = 0;
+    double p;
 
     while(counter < 2 * pop_size){
         for(std::vector<int>::iterator it=ndo.begin(); it != ndo.end(); ++it){
+            p = (double) rand() / RAND_MAX;
+            if(p < AFFINITY_PREFERENCE){
+                P[counter] = Ag[*it];
+            }
+            else{
+                int alt_idx = rand() % pop_size;
+                P[counter] = Ag[alt_idx];
+            }
 
-            P[counter] = Ag[*it];
+
             counter++;
             if(counter >= 2 * pop_size){
                 break;
@@ -631,14 +654,28 @@ void solution::calculate(int iter){
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     initial_hv = HyperVolume(current_values, true);
 
-    while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
+    double ag_hv;
+
+    // while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
+    while(iteration < iter) {
         ResetCostMatrix();
 
         //printAntigens();
         /*std::cout << "CHECKPOINT 1"<< std::endl;*/
         calculateCostMatrix(Ag);
-        /*std::cout << "CHECKPOINT 2"<< std::endl;*/
+
+        //evaluateAllCosts(Ag, ag_values);
         evaluateAllCosts(Ag, current_values);
+        Individuals ag_sol;
+
+        for(int j=0; j<Ag.size(); j++){
+            ag_sol.push_back(current_values[j]);
+        }
+
+        std::sort(ag_sol.begin(), ag_sol.end(), SortbyOperatorReverse);
+        ag_hv = HyperVolume(ag_sol, false);
+        /*std::cout << "CHECKPOINT 2"<< std::endl;*/
+        
         //DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 3"<< std::endl;*/
         int ndo_idx, ndp_idx;
@@ -685,18 +722,33 @@ void solution::calculate(int iter){
         /*std::cout << "CHECKPOINT 12"<< std::endl;*/
         double max_hv = 0.0;
         double current_hv = 0.0;
+        
         int current_idx = 0;
+        bool betterThanAg;
         Individuals current_sol;
         Individuals best_sol;
+
+        // ag_values = Individuals(pop_size);
+        
+        // std::cout << "Print values" << std::endl;
+        // std::cout << "Print size: " << ag_values.size() << std::endl;
+        // for(int ai = 0; ai < ag_values.size(); ai++){
+        //     std::cout << "Pcost: " << (ag_values[ai]).pcost << " Ocost: " << (ag_values[ai]).ocost << std::endl;
+        // }
+        // std::cout << "Ag: " << ag_hv << std::endl;
 
         std::vector<int> best_ag;
         std::vector<int> current_ag;
 
-        for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
 
+        for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
+            // max_hv = 0.0;
+            // current_hv = 0.0;
             /*for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
                 std::cout << *i << ' ';
             std::cout << std::endl;*/
+
+            // betterThanAg = false;
 
             if(current_ag.size() < pop_size){
                 current_ag.push_back(current_idx);
@@ -711,7 +763,8 @@ void solution::calculate(int iter){
 
                     for(int j=0; j<best_ag.size(); j++){
                         best_sol.push_back(pool_values[best_ag[j]]);
-                    }
+                    }                    
+
                     for(int j=0; j<current_ag.size(); j++){
                         current_sol.push_back(pool_values[current_ag[j]]);
                     }
@@ -737,8 +790,11 @@ void solution::calculate(int iter){
             current_idx++;
         }
         /*std::cout << "CHECKPOINT 13"<< std::endl;*/
-        for(int i=0; i<best_ag.size(); i++){
-            Ag[i] = P[pool_values[best_ag[i]].index];
+        if(max_hv > ag_hv){
+            // std::cout << "Max hv: " << max_hv << " Ag hv: " << ag_hv << std::endl;
+            for(int i=0; i<best_ag.size(); i++){
+                Ag[i] = P[pool_values[best_ag[i]].index];
+            }
         }
 
         /*std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
