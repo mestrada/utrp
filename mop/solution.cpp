@@ -337,7 +337,16 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
                     rand_route_node = (int) rand() % nodes;
                     //jt->emplace(jt->begin() + rand_idx, rand_route_node);
                     //jt->push_back(rand_route_node);
-                    jt->insert(jt->begin() + rand_idx, rand_route_node);
+                    if(time_matrix[*((*jt).begin() + rand_idx - 1)][rand_route_node] != EMPTY){
+                        if(rand_idx < (*jt).size() -1){
+                            jt->insert(jt->begin() + rand_idx, rand_route_node);
+                        }
+                        else{
+                            if(time_matrix[*((*jt).begin() + rand_idx)][rand_route_node] != EMPTY){
+                            jt->insert(jt->begin() + rand_idx, rand_route_node);
+                            }
+                        }
+                    }
                 }
                 else{
                     /*std::cout << "CHECK MR 5b" << std::endl;*/
@@ -345,7 +354,28 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
                     if ((*jt).size() == minLen)
                         continue;
 
-                    (*jt).erase((*jt).begin() + rand_idx);
+                    if((*jt).begin() + rand_idx == (*jt).begin()){
+                                            // if(rand_idx == 0 or rand_idx == (*jt).size() - 1){
+                        // std::cout << "idx: " << rand_idx << " size: " << (*jt).size() << " pos: " << *((*jt).begin() + rand_idx) << std::endl;
+                        // std::cout << "begin: " << *((*jt).begin()) << std::endl;
+                        (*jt).erase((*jt).begin() + rand_idx);
+
+                    }else{
+                        if( (*jt).begin() + rand_idx == (*jt).end() -1){
+                                                // if(rand_idx == 0 or rand_idx == (*jt).size() - 1){
+                        // std::cout << "idx: " << rand_idx << " size: " << " pos: " << *((*jt).begin() + rand_idx) << std::endl;
+                        // std::cout << "begin: " << *((*jt).begin()) << std::endl;
+                        // std::cout << "end: " << *((*jt).end()) << std::endl;
+                        (*jt).erase((*jt).begin() + rand_idx);
+
+                        }
+                        else{
+                        if(time_matrix[*((*jt).begin() + rand_idx - 1)][*((*jt).begin() + rand_idx + 1)] != EMPTY){
+                            // std::cout << "V2 idx: " << rand_idx << " size: " << (*jt).size() << " pos: " << *((*jt).begin() + rand_idx) << std::endl;
+                            (*jt).erase((*jt).begin() + rand_idx);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -375,7 +405,31 @@ void solution::mutateChange(double mutate_prob){
                         rand_route_node = (int) (rand() % nodes);
                         if(!is_in(rand_route_node, *jt)){
                             //std::cout << "Change " << *kt << "for " << rand_route_node << endl;
-                            *kt = rand_route_node;
+
+                            if(kt != (*jt).begin() && kt != (*jt).end() - 1){
+                                if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
+                                    && time_matrix[*(kt+1)][rand_route_node] != EMPTY)
+                                {
+                                    *kt = rand_route_node;
+                                }
+                            }
+                            else{
+                                if(kt == (*jt).begin()){
+                                    if(time_matrix[*(kt+1)][rand_route_node]){
+                                        *kt = rand_route_node;   
+                                    }
+                                }
+                                else{
+                                    if(kt == (*jt).end()){
+                                        if(time_matrix[*(kt-1)][rand_route_node]){
+                                            *kt = rand_route_node;   
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            
                             break;
                         }
                     }
@@ -836,15 +890,18 @@ void solution::calculate(int iter){
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
-    PairCost(current_values);
+    // PairCost(current_values);
 
-/*    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            if(is_feasible(&(*jt))) {
-
-            }
-        }
-    }*/
+    // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+    //     for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+    //         if(is_feasible(&(*jt))) {
+    //             std::cout << "Feasible" << std::endl;
+    //         }
+    //         else{
+    //             std::cout << "Not feasible" << std::endl;
+    //         }
+    //     }
+    // }
     
 
 }
