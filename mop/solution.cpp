@@ -712,6 +712,7 @@ void solution::calculate(int iter){
 
     // while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
     while(iteration < iter) {
+        // std::cout << "iter " << iteration << std::endl; 
         ResetCostMatrix();
 
         //printAntigens();
@@ -793,7 +794,12 @@ void solution::calculate(int iter){
 
         std::vector<int> best_ag;
         std::vector<int> current_ag;
+        std::vector<int> temp_current_ag;
 
+        Individuals tempValues = Individuals(pop_size);
+        Solutions tempSol = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+
+        tempValues = pool_values;
 
         for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
             // max_hv = 0.0;
@@ -807,45 +813,65 @@ void solution::calculate(int iter){
             if(current_ag.size() < pop_size){
                 current_ag.push_back(current_idx);
                 best_ag = current_ag;
+                temp_current_ag = current_ag;
             }
             else{
+
                 best_sol.clear();
                 current_sol.clear();
 
                 for(int i=0; i<current_ag.size(); i++){
-                    current_ag[i] = current_idx;
+                    temp_current_ag[i] = current_idx;
 
-                    for(int j=0; j<best_ag.size(); j++){
-                        best_sol.push_back(pool_values[best_ag[j]]);
-                    }                    
+                    for(int ia=0; ia<best_ag.size(); ia++){
+                        tempSol[ia] = P[tempValues[best_ag[ia]].index];
+                    }
+                    calculateCostMatrix(tempSol);
+                    evaluateAllCosts(tempSol, tempValues);
 
-                    for(int j=0; j<current_ag.size(); j++){
-                        current_sol.push_back(pool_values[current_ag[j]]);
+                    for(int ja=0; ja<best_ag.size(); ja++){
+                        best_sol.push_back(tempValues[best_ag[ja]]);
                     }
 
                     std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
-                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
                     max_hv = HyperVolume(best_sol, false);
+                    DestroyMatrix(current_time_matrix);
+
+                    for(int ib=0; ib<temp_current_ag.size(); ib++){
+                        tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
+                    }
+                    calculateCostMatrix(tempSol);
+                    evaluateAllCosts(tempSol, tempValues);
+
+                    for(int jb=0; jb<temp_current_ag.size(); jb++){
+                        current_sol.push_back(tempValues[temp_current_ag[jb]]);
+                    }
+
+                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
                     current_hv = HyperVolume(current_sol, false);
 
-                    //std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
+                    // std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
 
                     if(max_hv > current_hv){
                         current_ag = best_ag;
+                        DestroyMatrix(current_time_matrix);
                     }
                     else{
-                        best_ag = current_ag;
+                        best_ag = temp_current_ag;
+                        DestroyMatrix(current_time_matrix);
                         break;
                     }
-
                 }
+
+                
             }
 
             current_idx++;
         }
         /*std::cout << "CHECKPOINT 13"<< std::endl;*/
+        
         if(max_hv > ag_hv){
-            // std::cout << "Max hv: " << max_hv << " Ag hv: " << ag_hv << std::endl;
+            // std::cout << "Max hv: " << max_hv << " Ag hv: " << ag_hv << std::endl;    
             for(int i=0; i<best_ag.size(); i++){
                 Ag[i] = P[pool_values[best_ag[i]].index];
             }
@@ -884,12 +910,13 @@ void solution::calculate(int iter){
     //printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
-    DestroyMatrix(current_time_matrix);
+    
     std::cout << "Executed iterations: " << iteration << std::endl;
     //printActualValues();
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
+    DestroyMatrix(current_time_matrix);
     // PairCost(current_values);
 
     // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
