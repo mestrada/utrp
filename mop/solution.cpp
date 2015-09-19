@@ -296,7 +296,7 @@ bool solution::isDominated(double ocost, double pcost, int index){
 std::vector<int> solution::getNonDominated(void){
     int min_idx = 0;
     std::vector<int> non_dominated;
-    for(int i=1; i<pop_size; i++){
+    for(int i=1; i<routes; i++){
         if(!isDominated(current_values[i].ocost, current_values[i].pcost, i))
             non_dominated.push_back(i);
     }
@@ -710,10 +710,11 @@ void solution::clone(std::vector<int> ndo){
         for(std::vector<int>::iterator it=ndo.begin(); it != ndo.end(); ++it){
             p = (double) rand() / RAND_MAX;
             if(p < AFFINITY_PREFERENCE){
+                // std::cout << *it << " value *it" << std::endl;
                 P[counter] = Ag[*it];
             }
             else{
-                int alt_idx = rand() % pop_size;
+                int alt_idx = rand() % routes;
                 P[counter] = Ag[alt_idx];
             }
 
@@ -996,7 +997,7 @@ void solution::calculate(int iter){
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
     DestroyMatrix(current_time_matrix);
-    // PairCost(current_values);
+    PairCost(current_values);
 
     // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
     //     for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
