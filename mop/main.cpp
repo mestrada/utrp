@@ -52,6 +52,11 @@ int main (int argc, char **argv)
         seed = (unsigned) atoi(argv[9]);
         threshold = (double) atof(argv[10]);
 
+        if(population < number_routes){
+            std::cout << "Population must be larger than number of routes" << std::endl;
+            exit(1);
+        }
+
 
         file_path_demand_matrix = input_path_1.str();
         file_path_time_matrix = input_path_2.str();

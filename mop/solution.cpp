@@ -59,19 +59,19 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
     */
 
     // Q set of solutions
-    Q = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+    Q = Solutions(pop_size, Route(routes, EMPTY));
     // Ab Antibodies set
-    Ab = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+    Ab = Solutions(pop_size, Route(routes, EMPTY));
     // Ag Antigens set
-    Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+    Ag = Solutions(routes, Route(routes, EMPTY));
     // P pool of clones
-    P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
+    P = Solutions(2 * pop_size, Route(routes, EMPTY));
     // Auxiliar Antigens set
     // current_Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
 
-    current_values = Individuals(pop_size);
+    current_values = Individuals(routes);
     pool_values = Individuals(2 * pop_size);
-    ag_values = Individuals(pop_size);
+    ag_values = Individuals(routes);
 
     //current_antigens = Individuals(pop_size);
 }
@@ -110,37 +110,35 @@ void solution::print(){
         std::cout << std::endl;
     }*/
     int sol_n = 0;
-    for(SolIter it=Q.begin(); it != Q.end(); ++it){
+    for(SolIter jt=Q.begin(); jt != Q.end(); ++jt){
         std::cout << "Solution # " << sol_n << std::endl;
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
                 std::cout << *kt << "\t";
             }
             std::cout << std::endl;
-        }
         std::cout << std::endl;
         sol_n++;
-    }
+        }
+        
 }
 
 void solution::printAntigens(){
     std::cout << "Printing Ag" << std::endl;
 
     int sol_n = 0;
-    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+    for(SolIter jt=Ag.begin(); jt != Ag.end(); ++jt){
         std::cout << "Solution # " << sol_n << std::endl;
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            if(is_feasible(&(*jt))) {
-                std::cout << "Feasible" << std::endl;
-            }
-            else{
-                std::cout << "Unfeasible" << std::endl;
-            }
-            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
-                std::cout << *kt << "\t";
-            }
-            std::cout << std::endl;
+        if(is_feasible(&(*jt))) {
+            std::cout << "Feasible" << std::endl;
         }
+        else{
+            std::cout << "Unfeasible" << std::endl;
+        }
+        for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+            std::cout << *kt << "\t";
+        }
+
+        
         std::cout << std::endl;
         sol_n++;
     }
@@ -169,49 +167,49 @@ void solution::generateRandomIndividuals(void){
     //std::cout << "Generate random individuals to fill Q" << std::endl;
 
     for(SolIter it=Q.begin(); it != Q.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+        for(RouteIter kt=(*it).begin(); kt != (*it).end(); ++kt){
 
-                rand_route_node = (int) (rand() % nodes);
-                // Constraint: No loops and no repetitions        
-                if((*jt).empty()){
-                    *kt = rand_route_node;
-                }
-                else{
-                    // Force feasible solutions
-                    if(!is_in(rand_route_node, *jt)){
-                        int i;
-                        for(i=0; i<5; i++){
-                            if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
-                                && !is_in(rand_route_node, *jt)){
-                                *kt = rand_route_node;
+            rand_route_node = (int) (rand() % nodes);
+            // Constraint: No loops and no repetitions        
+            if((*it).empty()){
+                *kt = rand_route_node;
+            }
+            else{
+                // Force feasible solutions
+                if(!is_in(rand_route_node, *it)){
+                    int i;
+                    for(i=0; i<5; i++){
+                        if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
+                            && !is_in(rand_route_node, *it)){
+                            *kt = rand_route_node;
+                            break;
+                        }
+                        rand_route_node = (int) (rand() % nodes);
+                    }
+
+                    if(i == 5){
+                        int j;
+                        for(j=0; j<nodes; j++){
+                            if(!is_in(j, *it) && time_matrix[*(kt-1)][j] != EMPTY){
+                                *kt = j;
                                 break;
                             }
-                            rand_route_node = (int) (rand() % nodes);
                         }
-
-                        if(i == 5){
-                            int j;
-                            for(j=0; j<nodes; j++){
-                                if(!is_in(j, *jt) && time_matrix[*(kt-1)][j] != EMPTY){
-                                    *kt = j;
-                                    break;
-                                }
-                            }
-                            if(j == nodes){
-                                (*jt).erase(kt);
-                                kt--;
-                            }
+                        if(j == nodes){
+                            (*it).erase(kt);
+                            kt--;
                         }
-                        
                     }
-                    else{
-                        --kt;
-                    }
+                    
+                }
+                else{
+                    --kt;
                 }
             }
         }
+        
     }
+    std::cout << "Ending Random routes generation" << std::endl;
 }
 
 void solution::setDemandMatrix(int** dmatrix){
@@ -259,14 +257,14 @@ void solution::ResetCostMatrix(void){
     }
 }
 
-void solution::setCurrentTimeMatrix(Routes current_routes){
+void solution::setCurrentTimeMatrix(Solutions current_routes){
 
     /*std::cout << "CT CHECK 1"<< std::endl;*/
     InitializeMatrix(current_time_matrix);
     /*std::cout << "CT CHECK 2"<< std::endl;*/
     ResetMatrix(current_time_matrix);
 
-    for(RoutesIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
+    for(SolIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
         /*std::cout << "CT CHECK 3"<< std::endl;*/
         for(RouteIter kt=(*jt).begin(); (kt != (*jt).end() - 1 && kt != (*jt).end()); ++kt){
             /*std::cout << "CT CHECK 4 --"<< std::endl;*/
@@ -313,11 +311,7 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     int rand_route_node;
     int rand_idx;
 
-    /*std::cout << "CHECK MR 1" << std::endl;*/
-    for(SolIter it=P.begin(); it != P.end(); ++it){
-        /*std::cout << "CHECK MR 2" << std::endl;*/
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            /*std::cout << "CHECK MR 3" << std::endl;*/
+    for(SolIter jt=P.begin(); jt != P.end(); ++jt){
             p = (double) rand() / RAND_MAX;
 
             if(p < mutate_prob){
@@ -380,7 +374,6 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
             }
         }
 
-    }
 }
 
 void solution::mutateChange(double mutate_prob){
@@ -389,10 +382,9 @@ void solution::mutateChange(double mutate_prob){
     int rand_route_node;
         
     for(SolIter it=P.begin(); it != P.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
+            for(RouteIter kt=(*it).begin(); kt != (*it).end(); ++kt){
                 // Force feasibility
-                if(kt != (jt->end()) - 1){
+                if(kt != (it->end()) - 1){
                     if(current_time_matrix[*(kt+1)][*kt] != -1){
                         //&& current_time_matrix[*(kt+1)][*kt] != -1)
                         /*cout << "ctt " << current_time_matrix[*(kt+1)][*kt] << endl;
@@ -403,10 +395,10 @@ void solution::mutateChange(double mutate_prob){
                 if(p < mutate_prob){
                     while(true){
                         rand_route_node = (int) (rand() % nodes);
-                        if(!is_in(rand_route_node, *jt)){
+                        if(!is_in(rand_route_node, *it)){
                             //std::cout << "Change " << *kt << "for " << rand_route_node << endl;
 
-                            if(kt != (*jt).begin() && kt != (*jt).end() - 1){
+                            if(kt != (*it).begin() && kt != (*it).end() - 1){
                                 if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
                                     && time_matrix[*(kt+1)][rand_route_node] != EMPTY)
                                 {
@@ -414,13 +406,13 @@ void solution::mutateChange(double mutate_prob){
                                 }
                             }
                             else{
-                                if(kt == (*jt).begin()){
+                                if(kt == (*it).begin()){
                                     if(time_matrix[*(kt+1)][rand_route_node]){
                                         *kt = rand_route_node;   
                                     }
                                 }
                                 else{
-                                    if(kt == (*jt).end()){
+                                    if(kt == (*it).end()){
                                         if(time_matrix[*(kt-1)][rand_route_node]){
                                             *kt = rand_route_node;   
                                         }
@@ -438,12 +430,12 @@ void solution::mutateChange(double mutate_prob){
                         
                 }
             }
-        }
+        
     }
 }
 
 
-double solution::PassengerCost(Routes current_routes){
+double solution::PassengerCost(Solutions current_routes){
 
     /*
         
@@ -489,7 +481,7 @@ double solution::PassengerCost(Routes current_routes){
 }
 
 
-double solution::OperatorCost(Routes current_routes){
+double solution::OperatorCost(Solutions current_routes){
 
     /*
         The operator cost is the sum of the time between nodes of routes.
@@ -509,6 +501,39 @@ double solution::OperatorCost(Routes current_routes){
     return fo_cost;
 }
 
+
+double solution::RoutePassengerCost(Route route){
+
+    /*
+        
+
+    */
+
+    double total_cost = 0.0;
+    double total_demand = 0.0;
+
+    for (int i = 0; i < nodes; ++i)
+    {
+        for (int j = 0; j < nodes; ++j)
+        {
+            // SUM of L COSTS * Demand / Total demand
+
+            if (i == j)
+                continue;
+
+            if (is_in(i, route) && is_in(j, route) ){
+                total_cost += demand_matrix[i][j];   
+            }
+            else{
+                total_cost += demand_matrix[i][j] * INF;
+                
+            }
+            total_demand += demand_matrix[i][j];
+        }
+    }
+
+    return (double) total_cost / total_demand;
+}
 
 double solution::RouteOperatorCost(std::vector<int>* s){
 
@@ -552,7 +577,25 @@ double solution::RouteOperatorCost(std::vector<int>* s){
     return fo_value;
 }
 
-individual solution::evaluateCosts(Routes current_routes, int number){
+individual solution::evaluateRouteCosts(Route current_route, int number){
+    ind ind_eval;
+    double op_cost, pass_cost;
+
+    op_cost = RouteOperatorCost(&current_route);
+    pass_cost = RoutePassengerCost(current_route);
+
+    //std::cout << "Solution # " << number << std::endl;
+    //std::cout << "Total Operator cost: " << op_cost << std::endl;
+    //std::cout << "Total Passenger cost: " << pass_cost << std::endl;
+
+    ind_eval.ocost = op_cost;
+    ind_eval.pcost = pass_cost;
+    ind_eval.index = number;
+
+    return ind_eval;
+}
+
+individual solution::evaluateCosts(Solutions current_routes, int number){
     ind ind_eval;
     double op_cost, pass_cost;
 
@@ -594,17 +637,35 @@ int solution::getNonDominatedByPassengerCost(void){
 
 }
 
-void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
+void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref)
+{
+    //std::cout << "Evaluate All Costs" << std::endl; 
+    // int sol_number_aux = 0;
+    // individual aux_cost;
+
+    // for(SolIter it=sol_ref.begin(); it!=sol_ref.end(); it++)
+    // {
+    //     aux_cost = evaluateCosts(*it, sol_number_aux);
+    //     ind_ref[sol_number_aux] = aux_cost;
+    //     sol_number_aux++;
+    // }
+}
+
+
+void solution::evaluateAllRouteCosts(Solutions sol_ref, Individuals &ind_ref)
+{
     //std::cout << "Evaluate All Costs" << std::endl; 
     int sol_number_aux = 0;
     individual aux_cost;
-    for(SolIter it=sol_ref.begin(); it != sol_ref.end(); ++it){
-        aux_cost = evaluateCosts(*it, sol_number_aux);
+
+    for(SolIter it=sol_ref.begin(); it!=sol_ref.end(); it++)
+    {
+        aux_cost = evaluateRouteCosts(*it, sol_number_aux);
         ind_ref[sol_number_aux] = aux_cost;
-        //std::cout << "Sol " << sol_number_aux << ": " << aux_cost.ocost << " | " << aux_cost.pcost << std::endl;
         sol_number_aux++;
     }
 }
+
 
 void solution::printActualValues(void){
     for(int i=0; i< pop_size; i++)
@@ -615,14 +676,27 @@ void solution::clone(int ndo, int ndp){
     
     for(int i=0; i<2 * pop_size; i++){
         if(i< pop_size){
-            P[i] = Ag[i];
+            P[i] = Q[i];
         }
         else{
             if(i % 2 == 0)
-                P[i] = Ag[ndo];
+                P[i] = Q[ndo];
             else
-                P[i] = Ag[ndp];
+                P[i] = Q[ndp];
         }
+    }
+}
+
+
+void solution::fillAg(){
+    
+    int counter = 0;
+    double p;
+
+    while(counter < routes)
+    {
+        Ag[counter] = Q[counter];
+        counter++;
     }
 }
 
@@ -657,7 +731,7 @@ void solution::calculateCostMatrix(Solutions sol_set){
     /*std::cout << "CM CHECK 1"<< std::endl;*/
     for(SolIter it=sol_set.begin(); it != sol_set.end(); ++it){
         /*std::cout << "CM CHECK 2"<< std::endl;*/
-        setCurrentTimeMatrix(*it);
+        setCurrentTimeMatrix(sol_set);
         /*std::cout << "CM CHECK 3"<< std::endl;*/
         for(int i=0; i<nodes; i++){
             Graph G(nodes);
@@ -676,22 +750,90 @@ void solution::calculateCostMatrix(Solutions sol_set){
     /*std::cout << "CM CHECK 5"<< std::endl;*/
 }
 
+std::vector<int> solution::getBestRoutes(void){
+    int current_idx=0;
+
+    double max_hv = 0.0;
+    double current_hv = 0.0;
+
+    Individuals current_sol;
+    Individuals best_sol;
+
+    std::vector<int> best_ag;
+    std::vector<int> current_ag;
+    std::vector<int> temp_current_ag;
+
+    Individuals tempValues = Individuals(routes);
+    Solutions tempSol = Solutions(routes, Route(routes, EMPTY));
+    tempValues = pool_values;
+
+    for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
+            if(current_ag.size() < routes){
+                current_ag.push_back(current_idx);
+                best_ag = current_ag;
+                temp_current_ag = current_ag;
+            }
+            else{
+
+                best_sol.clear();
+                current_sol.clear();
+
+                for(int i=0; i<current_ag.size(); i++){
+                    temp_current_ag[i] = current_idx;
+
+                    for(int ia=0; ia<best_ag.size(); ia++){
+                        tempSol[ia] = P[tempValues[best_ag[ia]].index];
+                    }
+                    calculateCostMatrix(tempSol);
+                    evaluateAllRouteCosts(tempSol, tempValues);
+
+                    for(int ja=0; ja<best_ag.size(); ja++){
+                        best_sol.push_back(tempValues[best_ag[ja]]);
+                    }
+
+                    std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
+                    max_hv = HyperVolume(best_sol, false);
+                    DestroyMatrix(current_time_matrix);
+
+                    for(int ib=0; ib<temp_current_ag.size(); ib++){
+                        tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
+                    }
+                    calculateCostMatrix(tempSol);
+                    evaluateAllRouteCosts(tempSol, tempValues);
+
+                    for(int jb=0; jb<temp_current_ag.size(); jb++){
+                        current_sol.push_back(tempValues[temp_current_ag[jb]]);
+                    }
+
+                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
+                    current_hv = HyperVolume(current_sol, false);
+
+                    // std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
+
+                    if(max_hv > current_hv){
+                        current_ag = best_ag;
+                        DestroyMatrix(current_time_matrix);
+                    }
+                    else{
+                        best_ag = temp_current_ag;
+                        DestroyMatrix(current_time_matrix);
+                        break;
+                    }
+                }
+
+                
+            }
+
+            current_idx++;
+        }
+
+    return best_ag;
+}
+
 void solution::calculate(int iter){
     
     int iteration = 0;
     double mutation_type;
-
-    //      1b. Store the best individuals in Ag
-    Ag = Q;
-
-
-    for(SolIter it=Q.begin(); it != Q.end(); ++it){
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
-            if(is_feasible(&(*jt))) {
-
-            }
-        }
-    }
 
     InitializeMatrix(current_time_matrix);
 
@@ -699,7 +841,9 @@ void solution::calculate(int iter){
 
     current_time_matrix = time_matrix;
 
-    evaluateAllCosts(Ag, current_values);
+    fillAg();
+
+    evaluateAllRouteCosts(Ag, current_values);
     //printActualValues();
 
     double initial_hv = 0.0;
@@ -719,8 +863,8 @@ void solution::calculate(int iter){
         /*std::cout << "CHECKPOINT 1"<< std::endl;*/
         calculateCostMatrix(Ag);
 
-        //evaluateAllCosts(Ag, ag_values);
-        evaluateAllCosts(Ag, current_values);
+        //evaluateAllRouteCosts(Ag, ag_values);
+        evaluateAllRouteCosts(Ag, current_values);
         Individuals ag_sol;
 
         for(int j=0; j<Ag.size(); j++){
@@ -771,7 +915,7 @@ void solution::calculate(int iter){
         /*std::cout << "CHECKPOINT 9"<< std::endl;*/
         calculateCostMatrix(P);
         /*std::cout << "CHECKPOINT 10"<< std::endl;*/
-        evaluateAllCosts(P, pool_values);
+        evaluateAllRouteCosts(P, pool_values);
         /*std::cout << "CHECKPOINT 11"<< std::endl;*/
         DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 12"<< std::endl;*/
@@ -780,100 +924,35 @@ void solution::calculate(int iter){
         
         int current_idx = 0;
         bool betterThanAg;
-        Individuals current_sol;
-        Individuals best_sol;
 
-        // ag_values = Individuals(pop_size);
-        
-        // std::cout << "Print values" << std::endl;
-        // std::cout << "Print size: " << ag_values.size() << std::endl;
-        // for(int ai = 0; ai < ag_values.size(); ai++){
-        //     std::cout << "Pcost: " << (ag_values[ai]).pcost << " Ocost: " << (ag_values[ai]).ocost << std::endl;
-        // }
-        // std::cout << "Ag: " << ag_hv << std::endl;
+        std::vector<int> current_best_ag;
+        Individuals current_best_sol;
+        // Solutions currentBestSol = Solutions(routes, Route(routes, EMPTY));
+        Solutions currentTempSol = Solutions(routes, Route(routes, EMPTY));  
 
-        std::vector<int> best_ag;
-        std::vector<int> current_ag;
-        std::vector<int> temp_current_ag;
+        current_best_ag = getBestRoutes();
 
-        Individuals tempValues = Individuals(pop_size);
-        Solutions tempSol = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
-
-        tempValues = pool_values;
-
-        for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
-            // max_hv = 0.0;
-            // current_hv = 0.0;
-            /*for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
-                std::cout << *i << ' ';
-            std::cout << std::endl;*/
-
-            // betterThanAg = false;
-
-            if(current_ag.size() < pop_size){
-                current_ag.push_back(current_idx);
-                best_ag = current_ag;
-                temp_current_ag = current_ag;
-            }
-            else{
-
-                best_sol.clear();
-                current_sol.clear();
-
-                for(int i=0; i<current_ag.size(); i++){
-                    temp_current_ag[i] = current_idx;
-
-                    for(int ia=0; ia<best_ag.size(); ia++){
-                        tempSol[ia] = P[tempValues[best_ag[ia]].index];
-                    }
-                    calculateCostMatrix(tempSol);
-                    evaluateAllCosts(tempSol, tempValues);
-
-                    for(int ja=0; ja<best_ag.size(); ja++){
-                        best_sol.push_back(tempValues[best_ag[ja]]);
-                    }
-
-                    std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
-                    max_hv = HyperVolume(best_sol, false);
-                    DestroyMatrix(current_time_matrix);
-
-                    for(int ib=0; ib<temp_current_ag.size(); ib++){
-                        tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
-                    }
-                    calculateCostMatrix(tempSol);
-                    evaluateAllCosts(tempSol, tempValues);
-
-                    for(int jb=0; jb<temp_current_ag.size(); jb++){
-                        current_sol.push_back(tempValues[temp_current_ag[jb]]);
-                    }
-
-                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
-                    current_hv = HyperVolume(current_sol, false);
-
-                    // std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
-
-                    if(max_hv > current_hv){
-                        current_ag = best_ag;
-                        DestroyMatrix(current_time_matrix);
-                    }
-                    else{
-                        best_ag = temp_current_ag;
-                        DestroyMatrix(current_time_matrix);
-                        break;
-                    }
-                }
-
-                
-            }
-
-            current_idx++;
+        for(int ia=0; ia<current_best_ag.size(); ia++){
+            currentTempSol[ia] = P[pool_values[current_best_ag[ia]].index];
         }
+        calculateCostMatrix(currentTempSol);
+        evaluateAllRouteCosts(currentTempSol, pool_values);
+
+        for(int ja=0; ja<current_best_ag.size(); ja++){
+            current_best_sol.push_back(pool_values[current_best_ag[ja]]);
+        }
+
+        std::sort(current_best_sol.begin(), current_best_sol.end(), SortbyOperatorReverse);
+        max_hv = HyperVolume(current_best_sol, false);
+        DestroyMatrix(current_time_matrix);
+
+
         /*std::cout << "CHECKPOINT 13"<< std::endl;*/
         
         if(max_hv > ag_hv){
             // std::cout << "Max hv: " << max_hv << " Ag hv: " << ag_hv << std::endl;    
-            for(int i=0; i<best_ag.size(); i++){
-                Ag[i] = P[pool_values[best_ag[i]].index];
+            for(int i=0; i<current_best_ag.size(); i++){
+                Ag[i] = P[pool_values[current_best_ag[i]].index];
             }
         }
 
@@ -890,17 +969,17 @@ void solution::calculate(int iter){
         }*/
         //printAntigens();
         calculateCostMatrix(Ag);
-        evaluateAllCosts(Ag, current_values);
+        evaluateAllRouteCosts(Ag, current_values);
         DestroyMatrix(current_time_matrix);
         std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
         //printActualValues();
         ref_hv = HyperVolume(current_values, false);
         iteration++;
 
-        Individuals().swap(current_sol);
-        Individuals().swap(best_sol);
-        std::vector<int>().swap(best_ag);
-        std::vector<int>().swap(current_ag);
+        // Individuals().swap(current_sol);
+        // Individuals().swap(best_sol);
+        // std::vector<int>().swap(best_ag);
+        // std::vector<int>().swap(current_ag);
     }
 
 
@@ -909,7 +988,7 @@ void solution::calculate(int iter){
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
     //printAntigens();
     calculateCostMatrix(Ag);
-    evaluateAllCosts(Ag, current_values);
+    evaluateAllRouteCosts(Ag, current_values);
     
     std::cout << "Executed iterations: " << iteration << std::endl;
     //printActualValues();

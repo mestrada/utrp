@@ -11,9 +11,8 @@
 #define AFFINITY_PREFERENCE 0.7
 
 typedef std::vector<int> Route;
-typedef std::vector<Route> Routes;
-typedef std::vector<Routes> Solutions;
-typedef std::vector< std::vector<std::vector<int> > >::iterator SolIter;
+typedef std::vector<Route> Solutions;
+typedef std::vector<std::vector<int> >::iterator SolIter;
 typedef std::vector< std::vector<int> >::iterator RoutesIter;
 typedef std::vector<int>::iterator RouteIter;
 
@@ -64,15 +63,18 @@ class solution
         int** current_time_matrix;
         int** costMatrix;
 
+        void fillAg(void);
         bool is_feasible(std::vector<int>*);
-        double OperatorCost(Routes);
+        double OperatorCost(Solutions);
         double RouteOperatorCost(std::vector<int>*);
-        double PassengerCost(Routes);
-        void setCurrentTimeMatrix(Routes);
+        double RoutePassengerCost(Route);
+        double PassengerCost(Solutions);
+        void setCurrentTimeMatrix(Solutions);
         void printAntigens();
         void mutateChange(double);
         void mutateResize(double, int, int);
-        individual evaluateCosts(Routes, int);
+        individual evaluateCosts(Solutions, int);
+        individual evaluateRouteCosts(Route, int);
         bool isDominated(double, double, int);
         std::vector<int> getNonDominated(void);
         void clone(std::vector<int>);
@@ -83,10 +85,12 @@ class solution
         void ResetCostMatrix(void);
         //void evaluateAllCosts(void);
         void evaluateAllCosts(Solutions, Individuals &);
+        void evaluateAllRouteCosts(Solutions, Individuals &);
         int getNonDominatedByOperatorCost(void);
         int getNonDominatedByPassengerCost(void);
         void clone(int, int);
         void calculateCostMatrix(Solutions);
+        std::vector<int> getBestRoutes(void);
 };
 #endif
 
