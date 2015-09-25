@@ -3,13 +3,13 @@
 
 using namespace std;
 
-template <typename ForwardIt>
+/*template <typename ForwardIt>
 ForwardIt next(ForwardIt it, 
                typename std::iterator_traits<ForwardIt>::difference_type n = 1)
 {
     std::advance(it, n);
     return it;
-}
+}*/
 
 
 Graph::Graph(){}
@@ -47,8 +47,9 @@ Graph::~Graph(){
 void Graph::read(int **m_tt){
 
     for(int i=0;i<numOfVertices;i++)
-            for(int j=0;j<numOfVertices;j++)
-                adjMatrix[i][j] = m_tt[i][j];
+            for(int j=0;j<numOfVertices;j++){
+                // std::cout << m_tt[i][j];
+                adjMatrix[i][j] = m_tt[i][j];}
 }
 
 
@@ -108,12 +109,12 @@ void Graph::printPath(int node, int parent)
         insert_node(parent, node);
     }
     else if(predecessor[node] == -1){
-        //cout<<"No path from "<<source<<"to "<<node<<endl;
+        // cout<<"No path from "<<source<<"to "<<node<<endl;
         //TODO: Clean Route
         }
         else {
             printPath(predecessor[node], parent);
-            //cout<<node+1<<"..";
+            // cout<<node+1<<"..";
             insert_node(parent, node);
         }
 }
@@ -192,7 +193,10 @@ void Graph::fill_matrix(int** &mat, int source){
         }
 
         /*mat[source][i] = cost;*/
-        if(cost != 0)
+        // std::cout << cost << std::endl;
+        if(cost != 0){
+            // std::cout << cost << std::endl;
             mat[i][source] = cost;
+            mat[source][i] = cost;}
     }
 }

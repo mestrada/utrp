@@ -262,20 +262,29 @@ void solution::ResetCostMatrix(void){
 void solution::setCurrentTimeMatrix(Routes current_routes){
 
     /*std::cout << "CT CHECK 1"<< std::endl;*/
-    InitializeMatrix(current_time_matrix);
+    // InitializeMatrix(current_time_matrix);
     /*std::cout << "CT CHECK 2"<< std::endl;*/
     ResetMatrix(current_time_matrix);
+
+    // for(int i=0; i<nodes;i++){
+    //     for (int j = 0; j < nodes; ++j)
+    //     {
+    //         std::cout << time_matrix[i][j];
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     for(RoutesIter jt=current_routes.begin(); jt != current_routes.end(); ++jt){
         /*std::cout << "CT CHECK 3"<< std::endl;*/
         for(RouteIter kt=(*jt).begin(); (kt != (*jt).end() - 1 && kt != (*jt).end()); ++kt){
             /*std::cout << "CT CHECK 4 --"<< std::endl;*/
-            /*std::cout << "values " << *kt << " | " << *(kt+1) << std::endl;
-            std::cout << "CM values " << current_time_matrix[*kt][*(kt + 1)] << std::endl;
-            std::cout << "TM values " << time_matrix[*kt][*(kt + 1)] << std::endl;
-            current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];*/
-            /*std::cout << "CT CHECK 5"<< std::endl;*/
+            // std::cout << "values " << *kt << " | " << *(kt+1) << std::endl;
+            // std::cout << "CM values " << current_time_matrix[*kt][*(kt + 1)] << std::endl;
+            // std::cout << "TM values " << time_matrix[*kt][*(kt + 1)] << std::endl;
+            // current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];
+            // std::cout << "CT CHECK 5"<< std::endl;
             current_time_matrix[*(kt + 1)][*kt] = time_matrix[*(kt + 1)][*kt];
+            current_time_matrix[*kt][*(kt + 1)] = time_matrix[*kt][*(kt + 1)];
         }
     }
 
@@ -401,7 +410,7 @@ void solution::mutateChange(double mutate_prob){
                 }
                 p = (double) rand() / RAND_MAX;
                 if(p < mutate_prob){
-                    while(true){
+                    for(int l; l<60; l++){
                         rand_route_node = (int) (rand() % nodes);
                         if(!is_in(rand_route_node, *jt)){
                             //std::cout << "Change " << *kt << "for " << rand_route_node << endl;
@@ -466,6 +475,13 @@ double solution::PassengerCost(Routes current_routes){
         G.fill_matrix(costMatrix, i);
     }
 
+    // for(int i = 0; i<nodes; i++){
+    //     for(int j=0; j<nodes; j++){
+    //         std::cout << costMatrix[i][j];
+    //     }
+    //     std::cout << std::endl;
+    // }
+
     for (int i = 0; i < nodes; ++i)
     {
         for (int j = 0; j < nodes; ++j)
@@ -473,6 +489,8 @@ double solution::PassengerCost(Routes current_routes){
             // SUM of L COSTS * Demand / Total demand
 
             if (i == j)
+                continue;
+            if (demand_matrix[i][j] == 0)
                 continue;
 
             if (costMatrix[i][j] == EMPTY){
@@ -485,7 +503,9 @@ double solution::PassengerCost(Routes current_routes){
         }
     }
 
-    return (double) total_cost / total_demand;
+    // std::cout << total_cost << std::endl;
+    // std::cout << total_demand << std::endl;
+    return (double) total_cost / total_demand ;
 }
 
 
@@ -657,7 +677,7 @@ void solution::calculateCostMatrix(Solutions sol_set){
     /*std::cout << "CM CHECK 1"<< std::endl;*/
     for(SolIter it=sol_set.begin(); it != sol_set.end(); ++it){
         /*std::cout << "CM CHECK 2"<< std::endl;*/
-        setCurrentTimeMatrix(*it);
+        // setCurrentTimeMatrix(*it);
         /*std::cout << "CM CHECK 3"<< std::endl;*/
         for(int i=0; i<nodes; i++){
             Graph G(nodes);
@@ -697,10 +717,26 @@ void solution::calculate(int iter){
 
     InitializeCostMatrix();
 
-    current_time_matrix = time_matrix;
+    for (int i = 0; i < nodes; ++i)
+    {   
+        for (int j = 0; j < nodes; ++j)
+        {
+            current_time_matrix[i][j] = time_matrix[i][j]; 
+        }
+        /* code */
+    }
+
+    // current_time_matrix = time_matrix;
+
+    // for(int i = 0; i<nodes; i++){
+    //     for(int j=0; j<nodes; j++){
+    //         std::cout << current_time_matrix[i][j] << "\t";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     evaluateAllCosts(Ag, current_values);
-    //printActualValues();
+    // printActualValues();
 
     double initial_hv = 0.0;
     double ref_hv = 0.0;
@@ -708,11 +744,18 @@ void solution::calculate(int iter){
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     initial_hv = HyperVolume(current_values, true);
 
+    // for(int i = 0; i<nodes; i++){
+    //     for(int j=0; j<nodes; j++){
+    //         std::cout << current_time_matrix[i][j] << "\t";
+    //     }
+    //     std::cout << std::endl;
+    // }    
+
     double ag_hv;
 
     // while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
     while(iteration < iter) {
-        // std::cout << "iter " << iteration << std::endl; 
+        std::cout << "iter " << iteration << std::endl; 
         ResetCostMatrix();
 
         //printAntigens();
@@ -731,7 +774,7 @@ void solution::calculate(int iter){
         ag_hv = HyperVolume(ag_sol, false);
         /*std::cout << "CHECKPOINT 2"<< std::endl;*/
         
-        //DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 3"<< std::endl;*/
         int ndo_idx, ndp_idx;
         std::vector<int> nondom;
@@ -767,13 +810,13 @@ void solution::calculate(int iter){
             mutateResize(mutation_prob, minlength, maxlength);}
 
         /*std::cout << "CHECKPOINT 8"<< std::endl;*/
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 9"<< std::endl;*/
         calculateCostMatrix(P);
         /*std::cout << "CHECKPOINT 10"<< std::endl;*/
         evaluateAllCosts(P, pool_values);
         /*std::cout << "CHECKPOINT 11"<< std::endl;*/
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 12"<< std::endl;*/
         double max_hv = 0.0;
         double current_hv = 0.0;
@@ -835,7 +878,7 @@ void solution::calculate(int iter){
 
                     std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
                     max_hv = HyperVolume(best_sol, false);
-                    DestroyMatrix(current_time_matrix);
+                    // DestroyMatrix(current_time_matrix);
 
                     for(int ib=0; ib<temp_current_ag.size(); ib++){
                         tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
@@ -854,11 +897,11 @@ void solution::calculate(int iter){
 
                     if(max_hv > current_hv){
                         current_ag = best_ag;
-                        DestroyMatrix(current_time_matrix);
+                        // DestroyMatrix(current_time_matrix);
                     }
                     else{
                         best_ag = temp_current_ag;
-                        DestroyMatrix(current_time_matrix);
+                        // DestroyMatrix(current_time_matrix);
                         break;
                     }
                 }
@@ -891,7 +934,7 @@ void solution::calculate(int iter){
         //printAntigens();
         calculateCostMatrix(Ag);
         evaluateAllCosts(Ag, current_values);
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
         //printActualValues();
         ref_hv = HyperVolume(current_values, false);
@@ -907,17 +950,18 @@ void solution::calculate(int iter){
     /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
-    //printAntigens();
+    // printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     
     std::cout << "Executed iterations: " << iteration << std::endl;
-    //printActualValues();
+    // printActualValues();
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
-    DestroyMatrix(current_time_matrix);
-    // PairCost(current_values);
+    // DestroyMatrix(current_time_matrix);
+    // DestroyMatrix(costMatrix);
+    PairCost(current_values);
 
     // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
     //     for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
