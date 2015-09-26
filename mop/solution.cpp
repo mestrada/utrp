@@ -64,6 +64,8 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
     Ab = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
     // Ag Antigens set
     Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
+
+    bestAg = Solutions();
     // P pool of clones
     P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
     // Auxiliar Antigens set
@@ -72,7 +74,7 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
     current_values = Individuals(pop_size);
     pool_values = Individuals(2 * pop_size);
     ag_values = Individuals(pop_size);
-
+    bestAgCurrentValues = Individuals();
     //current_antigens = Individuals(pop_size);
 }
 
@@ -123,13 +125,16 @@ void solution::print(){
     }
 }
 
-void solution::printAntigens(){
+void solution::printAntigens()
+{
     std::cout << "Printing Ag" << std::endl;
 
     int sol_n = 0;
-    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
+    for(SolIter it=bestAg.begin(); it != bestAg.end(); ++it)
+    {
         std::cout << "Solution # " << sol_n << std::endl;
-        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
+        for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt)
+        {
             if(is_feasible(&(*jt))) {
                 std::cout << "Feasible" << std::endl;
             }
@@ -308,8 +313,14 @@ std::vector<int> solution::getNonDominated(void){
     int min_idx = 0;
     std::vector<int> non_dominated;
     for(int i=1; i<pop_size; i++){
-        if(!isDominated(current_values[i].ocost, current_values[i].pcost, i))
+        if(!isDominated(current_values[i].ocost, current_values[i].pcost, i)){
             non_dominated.push_back(i);
+            std::cout << "Non Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
+        }
+        else{
+            std::cout << "Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
+        }
+            
     }
     return non_dominated;
 }
@@ -323,7 +334,7 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     int rand_idx;
 
     /*std::cout << "CHECK MR 1" << std::endl;*/
-    for(SolIter it=P.begin(); it != P.end(); ++it){
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         /*std::cout << "CHECK MR 2" << std::endl;*/
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             /*std::cout << "CHECK MR 3" << std::endl;*/
@@ -397,7 +408,7 @@ void solution::mutateChange(double mutate_prob){
     double p;
     int rand_route_node;
         
-    for(SolIter it=P.begin(); it != P.end(); ++it){
+    for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             for(RouteIter kt=(*jt).begin(); kt != (*jt).end(); ++kt){
                 // Force feasibility
@@ -620,7 +631,8 @@ void solution::evaluateAllCosts(Solutions sol_ref, Individuals &ind_ref){
     individual aux_cost;
     for(SolIter it=sol_ref.begin(); it != sol_ref.end(); ++it){
         aux_cost = evaluateCosts(*it, sol_number_aux);
-        ind_ref[sol_number_aux] = aux_cost;
+        //ind_ref[sol_number_aux] = aux_cost;
+        ind_ref.push_back(aux_cost);
         //std::cout << "Sol " << sol_number_aux << ": " << aux_cost.ocost << " | " << aux_cost.pcost << std::endl;
         sol_number_aux++;
     }
@@ -735,233 +747,129 @@ void solution::calculate(int iter){
     //     std::cout << std::endl;
     // }
 
-    evaluateAllCosts(Ag, current_values);
+    // evaluateAllCosts(Ag, current_values);
     // printActualValues();
 
-    double initial_hv = 0.0;
+    double best_hv = 0.0;
     double ref_hv = 0.0;
 
-    std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-    initial_hv = HyperVolume(current_values, true);
+    // std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
 
     // for(int i = 0; i<nodes; i++){
     //     for(int j=0; j<nodes; j++){
     //         std::cout << current_time_matrix[i][j] << "\t";
     //     }
     //     std::cout << std::endl;
-    // }    
+    // }
+
+    Solutions current_sol;
+    current_sol = Solutions();
 
     double ag_hv;
+    while(iteration < iter)
+    {
+        current_sol.clear();
+        // std::cout << "iter " << iteration << std::endl;         
 
-    // while((iteration < iter) && !( (ref_hv > initial_hv) && (ref_hv - initial_hv) > threshold * initial_hv)) {
-    while(iteration < iter) {
-        std::cout << "iter " << iteration << std::endl; 
-        ResetCostMatrix();
-
-        //printAntigens();
-        /*std::cout << "CHECKPOINT 1"<< std::endl;*/
-        calculateCostMatrix(Ag);
-
-        //evaluateAllCosts(Ag, ag_values);
-        evaluateAllCosts(Ag, current_values);
-        Individuals ag_sol;
-
-        for(int j=0; j<Ag.size(); j++){
-            ag_sol.push_back(current_values[j]);
-        }
-
-        std::sort(ag_sol.begin(), ag_sol.end(), SortbyOperatorReverse);
-        ag_hv = HyperVolume(ag_sol, false);
-        /*std::cout << "CHECKPOINT 2"<< std::endl;*/
-        
-        // DestroyMatrix(current_time_matrix);
-        /*std::cout << "CHECKPOINT 3"<< std::endl;*/
-        int ndo_idx, ndp_idx;
         std::vector<int> nondom;
         // Non-dominated Operator cost
 
-        nondom = getNonDominated();
-        // Non-dominated Passenger cost
-        /*std::cout << "CHECKPOINT 4"<< std::endl;*/
+        // bestAg.clear();
 
-        //std::cout << "Non Dominated op & pass:\t" << ndo_idx << " | " << ndp_idx << std::endl;
+        
+
+        //evaluateAllCosts(Ag, ag_values);
+        
+
+        nondom = getNonDominated();
+        for(std::vector<int>::iterator it=nondom.begin(); it != nondom.end(); ++it)
+        {
+            current_sol.push_back(Ag[*it]);
+        }
+
+        ResetCostMatrix();
+        calculateCostMatrix(current_sol);
+        bestAgCurrentValues.clear();
+        evaluateAllCosts(current_sol, bestAgCurrentValues);
+
+        Individuals ag_sol;
+
+        // std::cout << "Current Sol Len: " << current_sol.size() << std::endl;
+        // std::cout << "Current CurrentValues Len: " << bestAgCurrentValues.size() << std::endl;
+
+        for(int j=0; j<bestAgCurrentValues.size(); j++){
+            ag_sol.push_back(bestAgCurrentValues[j]);
+        }
+
+
+        if(iteration != 0)
+        {
+            mutation_type = (double) rand() / RAND_MAX;
+            if(mutation_type < MUTATION_TYPE_DIST)
+            {
+                mutateChange(mutation_prob);
+            }
+            else
+            {
+                mutateResize(mutation_prob, minlength, maxlength);
+            }
+        }
+
+        std::sort(ag_sol.begin(), ag_sol.end(), SortbyOperatorReverse);
+        if(iteration == 0){
+            for(SolIter it=current_sol.begin();it!=current_sol.end(); it++)
+            {
+                bestAg.clear();
+                bestAg.push_back(*it);
+            }
+
+            ag_hv = HyperVolume(ag_sol, true);
+            best_hv = ag_hv;
+        }
+        else{
+            ag_hv = HyperVolume(ag_sol, false);
+            if(ag_hv > best_hv){
+                bestAg.clear();
+                for(SolIter it=current_sol.begin();it!=current_sol.end(); it++)
+                {
+                    bestAg.push_back(*it);
+                }
+                best_hv = ag_hv;
+            }
+        }
 
         if(nondom.size() > 0){
-            /*std::cout << "CHECKPOINT 5a"<< std::endl;*/
-            clone(nondom);
+            // clone(nondom);
         }
         else{
-            /*std::cout << "CHECKPOINT 5b"<< std::endl;*/
-            ndp_idx = getNonDominatedByPassengerCost();
-            ndo_idx = getNonDominatedByOperatorCost();
-            clone(ndo_idx, ndp_idx);
+            std::cout << "NON DOM = 0" << std::endl;
+            // clone(ndo_idx, ndp_idx);
         }
-        /*std::cout << "CHECKPOINT 6"<< std::endl;*/
-        //mutate
-
-        //std::cout << "Mutation process executed with p: " << mutation_prob << std::endl;
-
-        mutation_type = (double) rand() / RAND_MAX;
-        if(mutation_type < MUTATION_TYPE_DIST){
-            /*std::cout << "CHECKPOINT 7a"<< std::endl;*/
-            mutateChange(mutation_prob);}
-        else{
-            /*std::cout << "CHECKPOINT 7b"<< std::endl;*/
-            mutateResize(mutation_prob, minlength, maxlength);}
-
-        /*std::cout << "CHECKPOINT 8"<< std::endl;*/
-        // DestroyMatrix(current_time_matrix);
-        /*std::cout << "CHECKPOINT 9"<< std::endl;*/
-        calculateCostMatrix(P);
-        /*std::cout << "CHECKPOINT 10"<< std::endl;*/
-        evaluateAllCosts(P, pool_values);
-        /*std::cout << "CHECKPOINT 11"<< std::endl;*/
-        // DestroyMatrix(current_time_matrix);
-        /*std::cout << "CHECKPOINT 12"<< std::endl;*/
-        double max_hv = 0.0;
-        double current_hv = 0.0;
-        
-        int current_idx = 0;
-        bool betterThanAg;
-        Individuals current_sol;
-        Individuals best_sol;
-
-        // ag_values = Individuals(pop_size);
-        
-        // std::cout << "Print values" << std::endl;
-        // std::cout << "Print size: " << ag_values.size() << std::endl;
-        // for(int ai = 0; ai < ag_values.size(); ai++){
-        //     std::cout << "Pcost: " << (ag_values[ai]).pcost << " Ocost: " << (ag_values[ai]).ocost << std::endl;
-        // }
-        // std::cout << "Ag: " << ag_hv << std::endl;
-
-        std::vector<int> best_ag;
-        std::vector<int> current_ag;
-        std::vector<int> temp_current_ag;
-
-        Individuals tempValues = Individuals(pop_size);
-        Solutions tempSol = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
-
-        tempValues = pool_values;
-
-        for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
-            // max_hv = 0.0;
-            // current_hv = 0.0;
-            /*for( std::vector<int>::const_iterator i = best_ag.begin(); i != best_ag.end(); ++i)
-                std::cout << *i << ' ';
-            std::cout << std::endl;*/
-
-            // betterThanAg = false;
-
-            if(current_ag.size() < pop_size){
-                current_ag.push_back(current_idx);
-                best_ag = current_ag;
-                temp_current_ag = current_ag;
-            }
-            else{
-
-                best_sol.clear();
-                current_sol.clear();
-
-                for(int i=0; i<current_ag.size(); i++){
-                    temp_current_ag[i] = current_idx;
-
-                    for(int ia=0; ia<best_ag.size(); ia++){
-                        tempSol[ia] = P[tempValues[best_ag[ia]].index];
-                    }
-                    calculateCostMatrix(tempSol);
-                    evaluateAllCosts(tempSol, tempValues);
-
-                    for(int ja=0; ja<best_ag.size(); ja++){
-                        best_sol.push_back(tempValues[best_ag[ja]]);
-                    }
-
-                    std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
-                    max_hv = HyperVolume(best_sol, false);
-                    // DestroyMatrix(current_time_matrix);
-
-                    for(int ib=0; ib<temp_current_ag.size(); ib++){
-                        tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
-                    }
-                    calculateCostMatrix(tempSol);
-                    evaluateAllCosts(tempSol, tempValues);
-
-                    for(int jb=0; jb<temp_current_ag.size(); jb++){
-                        current_sol.push_back(tempValues[temp_current_ag[jb]]);
-                    }
-
-                    std::sort(current_sol.begin(), current_sol.end(), SortbyOperatorReverse);
-                    current_hv = HyperVolume(current_sol, false);
-
-                    // std::cout << "Max HV: " << max_hv << " | Current HV: " << current_hv << std::endl;
-
-                    if(max_hv > current_hv){
-                        current_ag = best_ag;
-                        // DestroyMatrix(current_time_matrix);
-                    }
-                    else{
-                        best_ag = temp_current_ag;
-                        // DestroyMatrix(current_time_matrix);
-                        break;
-                    }
-                }
-
-                
-            }
-
-            current_idx++;
-        }
-        /*std::cout << "CHECKPOINT 13"<< std::endl;*/
-        
-        if(max_hv > ag_hv){
-            // std::cout << "Max hv: " << max_hv << " Ag hv: " << ag_hv << std::endl;    
-            for(int i=0; i<best_ag.size(); i++){
-                Ag[i] = P[pool_values[best_ag[i]].index];
-            }
-        }
-
-        /*std::sort(pool_values.begin(), pool_values.end(), SortbyOperator);
-
-        for(int i=0; i< floor(pop_size / 2); i++){
-            Ag[i] = P[pool_values[i].index];
-        }
-
-        std::sort(pool_values.begin(), pool_values.end(), SortbyPassenger);
-
-        for(int i=0; i< floor(pop_size / 2); i++){
-            Ag[i + floor(pop_size / 2)] = P[pool_values[i].index];
-        }*/
-        //printAntigens();
-        calculateCostMatrix(Ag);
-        evaluateAllCosts(Ag, current_values);
-        // DestroyMatrix(current_time_matrix);
-        std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-        //printActualValues();
-        ref_hv = HyperVolume(current_values, false);
         iteration++;
-
-        Individuals().swap(current_sol);
-        Individuals().swap(best_sol);
-        std::vector<int>().swap(best_ag);
-        std::vector<int>().swap(current_ag);
     }
 
 
     /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
+    bestAgCurrentValues.clear();
+    
+    ResetCostMatrix();
+    calculateCostMatrix(bestAg);
+    evaluateAllCosts(bestAg, bestAgCurrentValues);
     // printAntigens();
-    calculateCostMatrix(Ag);
-    evaluateAllCosts(Ag, current_values);
     
     std::cout << "Executed iterations: " << iteration << std::endl;
     // printActualValues();
 
-    std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-    HyperVolume(current_values, true);
+    std::sort(bestAgCurrentValues.begin(), bestAgCurrentValues.end(), SortbyOperatorReverse);
+    HyperVolume(bestAgCurrentValues, true);
+
+    // std::cout << "Current Sol Len: " << bestAg.size() << std::endl;
+    // std::cout << "Current CurrentValues Len: " << bestAgCurrentValues.size() << std::endl;
     // DestroyMatrix(current_time_matrix);
     // DestroyMatrix(costMatrix);
-    PairCost(current_values);
+    PairCost(bestAgCurrentValues);
 
     // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
     //     for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){

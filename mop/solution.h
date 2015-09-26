@@ -53,11 +53,13 @@ class solution
         Individuals current_values;
         Individuals pool_values;
         Individuals ag_values;
+        Individuals bestAgCurrentValues;
 
         Solutions Q;
         Solutions Ab;
         Solutions Ag;
         Solutions P;
+        Solutions bestAg;
 
         int** demand_matrix;
         int** time_matrix;

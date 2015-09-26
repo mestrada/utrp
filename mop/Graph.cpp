@@ -3,13 +3,13 @@
 
 using namespace std;
 
-/*template <typename ForwardIt>
+template <typename ForwardIt>
 ForwardIt next(ForwardIt it, 
                typename std::iterator_traits<ForwardIt>::difference_type n = 1)
 {
     std::advance(it, n);
     return it;
-}*/
+}
 
 
 Graph::Graph(){}
