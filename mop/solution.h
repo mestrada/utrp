@@ -8,7 +8,7 @@
 #define EMPTY -1
 #define INF 100
 #define MUTATION_TYPE_DIST 0.5
-#define AFFINITY_PREFERENCE 0.7
+#define AFFINITY_PREFERENCE 1
 
 typedef std::vector<int> Route;
 typedef std::vector<Route> Routes;
@@ -75,8 +75,8 @@ class solution
         void mutateChange(double);
         void mutateResize(double, int, int);
         individual evaluateCosts(Routes, int);
-        bool isDominated(double, double, int);
-        std::vector<int> getNonDominated(void);
+        bool isDominated(Individuals, double, double, int);
+        std::vector<int> getNonDominated(Individuals);
         void clone(std::vector<int>);
         void DestroyMatrix(int** &m);
         void InitializeMatrix(int** &);

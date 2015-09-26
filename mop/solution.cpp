@@ -67,11 +67,12 @@ solution::solution(int population, int n_routes, int n_nodes, int minlen,
 
     bestAg = Solutions();
     // P pool of clones
-    P = Solutions(2 * pop_size, Routes(routes, Route(routes, EMPTY)));
+    P = Solutions( pop_size, Routes(routes, Route(routes, EMPTY)));
     // Auxiliar Antigens set
     // current_Ag = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
 
-    current_values = Individuals(pop_size);
+    // current_values = Individuals(pop_size);
+    current_values = Individuals();
     pool_values = Individuals(2 * pop_size);
     ag_values = Individuals(pop_size);
     bestAgCurrentValues = Individuals();
@@ -184,9 +185,11 @@ void solution::generateRandomIndividuals(void){
                 }
                 else{
                     // Force feasible solutions
-                    if(!is_in(rand_route_node, *jt)){
+                    if(!is_in(rand_route_node, *jt))
+                    {
                         int i;
-                        for(i=0; i<5; i++){
+                        for(i=0; i<5; i++)
+                        {
                             if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
                                 && !is_in(rand_route_node, *jt)){
                                 *kt = rand_route_node;
@@ -295,30 +298,30 @@ void solution::setCurrentTimeMatrix(Routes current_routes){
 
 }
 
-bool solution::isDominated(double ocost, double pcost, int index){
+bool solution::isDominated(Individuals refvalues, double ocost, double pcost, int index){
     for(int i=1; i<pop_size; i++){
         if(i == index)
             continue;
-        if(current_values[i].ocost <=  ocost  && current_values[i].pcost < pcost){
+        if(refvalues[i].ocost <=  ocost  && refvalues[i].pcost < pcost){
                 return true;
             }
-        if(current_values[i].ocost <  ocost  && current_values[i].pcost <= pcost){
+        if(refvalues[i].ocost <  ocost  && refvalues[i].pcost <= pcost){
             return true;
         }
     }
     return false;
 }
 
-std::vector<int> solution::getNonDominated(void){
+std::vector<int> solution::getNonDominated(Individuals values){
     int min_idx = 0;
     std::vector<int> non_dominated;
-    for(int i=1; i<pop_size; i++){
-        if(!isDominated(current_values[i].ocost, current_values[i].pcost, i)){
+    for(int i=1; i<values.size(); i++){
+        if(!isDominated(values, current_values[i].ocost, current_values[i].pcost, i)){
             non_dominated.push_back(i);
-            std::cout << "Non Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
+            // std::cout << "Non Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
         }
         else{
-            std::cout << "Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
+            // std::cout << "Dom: " << current_values[i].ocost << ", " << current_values[i].pcost << std::endl;
         }
             
     }
@@ -549,27 +552,16 @@ double solution::RouteOperatorCost(std::vector<int>* s){
 
     for(std::vector<int>::iterator it=s->begin(); it != s->end(); ++it){
             if(it != (s->end() -1)){
-                // std::cout << "it- " << *it << " |it+1- " << *(it+1) << std::endl;
-                // std::cout << "tt- " << current_time_matrix[*it][*(it + 1)] << std::endl;
-                // std::cout << "tt- " << current_time_matrix[*(it + 1)][*it] << std::endl;
-                 // if (current_time_matrix[*it][*(it + 1)] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
-                if (current_time_matrix[*it][*(it + 1)] > 0){
-                    // if (current_time_matrix[*it][*(it + 1)] > 1000){
-                    //     // std::cout << "ctm " << current_time_matrix[*it][*(it + 1)] << std::endl;
-                    //     std::cout << "x,y: " << *it << "," << *(it + 1) << std::endl;
-                    // }
+                if (time_matrix[*it][*(it + 1)] > 0)
+                {
                     
-                    fo_value += current_time_matrix[*it][*(it + 1)];
-                }else{
-
-                    // if (current_time_matrix[*(it + 1)][*it] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
-                    if (current_time_matrix[*(it + 1)][*it] > 0){
-                        // if (current_time_matrix[*(it + 1)][*it] > 1000){
-                        //     // std::cout << "ctm " << current_time_matrix[*(it + 1)][*it] << std::endl;    
-                        //     std::cout << "x,y: " << *(it + 1) << "," << *it << std::endl;
-                        // }
-                        
-                        fo_value += current_time_matrix[*(it + 1)][*it];
+                    fo_value += time_matrix[*it][*(it + 1)];
+                }
+                else
+                {
+                    if (time_matrix[*(it + 1)][*it] > 0)
+                    {   
+                        fo_value += time_matrix[*(it + 1)][*it];
                     }
                     else{
                     fo_value += INF;
@@ -664,7 +656,7 @@ void solution::clone(std::vector<int> ndo){
     int counter = 0;
     double p;
 
-    while(counter < 2 * pop_size){
+    while(counter < pop_size){
         for(std::vector<int>::iterator it=ndo.begin(); it != ndo.end(); ++it){
             p = (double) rand() / RAND_MAX;
             if(p < AFFINITY_PREFERENCE){
@@ -682,6 +674,11 @@ void solution::clone(std::vector<int> ndo){
             }
         }
     }
+
+    for(int i=0;i<pop_size;i++)
+    {
+        Ag[i] = P[i];
+    }
 }
 
 void solution::calculateCostMatrix(Solutions sol_set){
@@ -689,7 +686,7 @@ void solution::calculateCostMatrix(Solutions sol_set){
     /*std::cout << "CM CHECK 1"<< std::endl;*/
     for(SolIter it=sol_set.begin(); it != sol_set.end(); ++it){
         /*std::cout << "CM CHECK 2"<< std::endl;*/
-        // setCurrentTimeMatrix(*it);
+        setCurrentTimeMatrix(*it);
         /*std::cout << "CM CHECK 3"<< std::endl;*/
         for(int i=0; i<nodes; i++){
             Graph G(nodes);
@@ -753,90 +750,89 @@ void solution::calculate(int iter){
     double best_hv = 0.0;
     double ref_hv = 0.0;
 
-    // std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
-
-    // for(int i = 0; i<nodes; i++){
-    //     for(int j=0; j<nodes; j++){
-    //         std::cout << current_time_matrix[i][j] << "\t";
-    //     }
-    //     std::cout << std::endl;
-    // }
 
     Solutions current_sol;
     current_sol = Solutions();
-
+    std::vector<int> nondom;
     double ag_hv;
+    Individuals ag_sol;
+
+    ResetCostMatrix();
+    calculateCostMatrix(Ag);
+    evaluateAllCosts(Ag, current_values);
+
+    // std::cout << "current_values size: " << current_values.size() << std::endl;
+    // for(IndIter it=current_values.begin(); it!=current_values.end(); ++it)
+    // {
+    //     std::cout << "O P costs: " << (*it).ocost << ", " << (*it).pcost << std::endl;
+    // }
+
+
+    nondom = getNonDominated(current_values);
+    for(std::vector<int>::iterator it=nondom.begin(); it != nondom.end(); ++it)
+    {
+        current_sol.push_back(Ag[*it]);
+    }
+
+    bestAg.clear();
+    for(SolIter it=current_sol.begin();it!=current_sol.end(); it++)
+    {
+        
+        bestAg.push_back(*it);
+    }
+
+    bestAgCurrentValues.clear();
+    ResetCostMatrix();
+
+    calculateCostMatrix(bestAg);
+    evaluateAllCosts(bestAg, bestAgCurrentValues);
+    // std::cout << "bestAg first size: " << bestAg.size() << std::endl; 
+    // std::cout << "bestAgCurrentValues first size: " << bestAgCurrentValues.size() << std::endl; 
+    // PairCost(bestAgCurrentValues);
+    std::sort(bestAgCurrentValues.begin(), bestAgCurrentValues.end(), SortbyOperatorReverse);
+    ag_hv = HyperVolume(bestAgCurrentValues, true);
+    best_hv = ag_hv;
+
     while(iteration < iter)
     {
         current_sol.clear();
+        nondom.clear();
+        ag_sol.clear();
+        current_values.clear();
         // std::cout << "iter " << iteration << std::endl;         
 
-        std::vector<int> nondom;
         // Non-dominated Operator cost
-
-        // bestAg.clear();
-
-        
 
         //evaluateAllCosts(Ag, ag_values);
         
+        ResetCostMatrix();
+        calculateCostMatrix(Ag);
+        evaluateAllCosts(Ag, current_values);
 
-        nondom = getNonDominated();
+        nondom = getNonDominated(current_values);
         for(std::vector<int>::iterator it=nondom.begin(); it != nondom.end(); ++it)
         {
             current_sol.push_back(Ag[*it]);
         }
 
-        ResetCostMatrix();
-        calculateCostMatrix(current_sol);
-        bestAgCurrentValues.clear();
-        evaluateAllCosts(current_sol, bestAgCurrentValues);
-
-        Individuals ag_sol;
-
         // std::cout << "Current Sol Len: " << current_sol.size() << std::endl;
         // std::cout << "Current CurrentValues Len: " << bestAgCurrentValues.size() << std::endl;
 
-        for(int j=0; j<bestAgCurrentValues.size(); j++){
-            ag_sol.push_back(bestAgCurrentValues[j]);
-        }
-
-
-        if(iteration != 0)
-        {
-            mutation_type = (double) rand() / RAND_MAX;
-            if(mutation_type < MUTATION_TYPE_DIST)
-            {
-                mutateChange(mutation_prob);
-            }
-            else
-            {
-                mutateResize(mutation_prob, minlength, maxlength);
-            }
+        for(int j=0; j<current_values.size(); j++){
+            ag_sol.push_back(current_values[j]);
         }
 
         std::sort(ag_sol.begin(), ag_sol.end(), SortbyOperatorReverse);
-        if(iteration == 0){
+        ag_hv = HyperVolume(ag_sol, false);
+        if(ag_hv > best_hv){
+            bestAg.clear();
             for(SolIter it=current_sol.begin();it!=current_sol.end(); it++)
             {
-                bestAg.clear();
                 bestAg.push_back(*it);
             }
-
-            ag_hv = HyperVolume(ag_sol, true);
             best_hv = ag_hv;
         }
-        else{
-            ag_hv = HyperVolume(ag_sol, false);
-            if(ag_hv > best_hv){
-                bestAg.clear();
-                for(SolIter it=current_sol.begin();it!=current_sol.end(); it++)
-                {
-                    bestAg.push_back(*it);
-                }
-                best_hv = ag_hv;
-            }
-        }
+        
 
         if(nondom.size() > 0){
             // clone(nondom);
@@ -845,6 +841,18 @@ void solution::calculate(int iter){
             std::cout << "NON DOM = 0" << std::endl;
             // clone(ndo_idx, ndp_idx);
         }
+
+
+        mutation_type = (double) rand() / RAND_MAX;
+        if(mutation_type < MUTATION_TYPE_DIST)
+        {
+            mutateChange(mutation_prob);
+        }
+        else
+        {
+            mutateResize(mutation_prob, minlength, maxlength);
+        }
+
         iteration++;
     }
 
@@ -853,7 +861,6 @@ void solution::calculate(int iter){
     std::cout << "\n--------\n--------\n" << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
     bestAgCurrentValues.clear();
-    
     ResetCostMatrix();
     calculateCostMatrix(bestAg);
     evaluateAllCosts(bestAg, bestAgCurrentValues);
