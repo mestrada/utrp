@@ -262,7 +262,7 @@ void solution::ResetCostMatrix(void){
 void solution::setCurrentTimeMatrix(Routes current_routes){
 
     /*std::cout << "CT CHECK 1"<< std::endl;*/
-    InitializeMatrix(current_time_matrix);
+    // InitializeMatrix(current_time_matrix);
     /*std::cout << "CT CHECK 2"<< std::endl;*/
     ResetMatrix(current_time_matrix);
 
@@ -311,7 +311,8 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
     int mutation_t;
 
     int rand_route_node;
-    int rand_idx;
+    vector<int>::size_type rand_idx;
+    vector<int>::size_type size_of_v;
 
     /*std::cout << "CHECK MR 1" << std::endl;*/
     for(SolIter it=P.begin(); it != P.end(); ++it){
@@ -319,39 +320,53 @@ void solution::mutateResize(double mutate_prob, int minLen, int maxLen){
         for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
             /*std::cout << "CHECK MR 3" << std::endl;*/
             p = (double) rand() / RAND_MAX;
-
+            size_of_v = (*jt).size();
             if(p < mutate_prob){
                 /*std::cout << "CHECK MR 4" << std::endl;*/
                 /*std::cout << "CHECK MR V " << (*jt).size() <<  std::endl;*/
-                if ((*jt).size() == 0)
+                if (size_of_v == 0)
                     break;
-                rand_idx = rand() % (*jt).size();
+                rand_idx = rand() % size_of_v;
+                if (is_in(rand_idx, *jt)){
+                    continue;
+                }
                 /*std::cout << "CHECK MR 4ii" << std::endl;*/
                 mutation_t = (int) rand() % 2;
                 if(mutation_t != 1){
                     /*std::cout << "CHECK MR 5a" << std::endl;*/
                     // Add node
-                    if((*jt).size() == maxLen)
+
+                    if(size_of_v == maxLen)
                         continue;
 
                     rand_route_node = (int) rand() % nodes;
                     //jt->emplace(jt->begin() + rand_idx, rand_route_node);
                     //jt->push_back(rand_route_node);
-                    if(time_matrix[*((*jt).begin() + rand_idx - 1)][rand_route_node] != EMPTY){
-                        if(rand_idx < (*jt).size() -1){
-                            jt->insert(jt->begin() + rand_idx, rand_route_node);
-                        }
-                        else{
-                            if(time_matrix[*((*jt).begin() + rand_idx)][rand_route_node] != EMPTY){
-                            jt->insert(jt->begin() + rand_idx, rand_route_node);
+                    if (rand_idx > 0){
+                        if(time_matrix[*((*jt).begin() + rand_idx - 1)][rand_route_node] != EMPTY)
+                        {
+                            if(rand_idx > size_of_v -1){
+                                jt->insert(jt->begin() + rand_idx, rand_route_node);
                             }
+                            else{
+                                if(time_matrix[*((*jt).begin() + rand_idx)][rand_route_node] != EMPTY){
+                                jt->insert(jt->begin() + rand_idx, rand_route_node);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(time_matrix[*((*jt).begin() + rand_idx)][rand_route_node] != EMPTY){
+                            jt->insert(jt->begin() + rand_idx, rand_route_node);
+                            // std::cout << "CHECK MR 5b rand :" << rand_route_node << std::endl;
                         }
                     }
                 }
                 else{
                     /*std::cout << "CHECK MR 5b" << std::endl;*/
                     // Remove node
-                    if ((*jt).size() == minLen)
+                    if (size_of_v == minLen)
                         continue;
 
                     if((*jt).begin() + rand_idx == (*jt).begin()){
@@ -400,28 +415,37 @@ void solution::mutateChange(double mutate_prob){
                         continue;}
                 }
                 p = (double) rand() / RAND_MAX;
+                int limit = nodes * 2;
+                int idx = 0;
                 if(p < mutate_prob){
-                    while(true){
+                    while(idx < limit){
                         rand_route_node = (int) (rand() % nodes);
-                        if(!is_in(rand_route_node, *jt)){
+                        if(!is_in(rand_route_node, *jt))
+                        {
                             //std::cout << "Change " << *kt << "for " << rand_route_node << endl;
 
-                            if(kt != (*jt).begin() && kt != (*jt).end() - 1){
+                            if(kt != (*jt).begin() && kt != (*jt).end() - 1)
+                            {
                                 if(time_matrix[*(kt-1)][rand_route_node] != EMPTY
                                     && time_matrix[*(kt+1)][rand_route_node] != EMPTY)
                                 {
                                     *kt = rand_route_node;
                                 }
                             }
-                            else{
-                                if(kt == (*jt).begin()){
-                                    if(time_matrix[*(kt+1)][rand_route_node]){
-                                        *kt = rand_route_node;   
+                            else
+                            {
+                                if(kt == (*jt).begin())
+                                {
+                                    if(time_matrix[*(kt+1)][rand_route_node] != EMPTY)
+                                    {
+                                        // std::cout << "Change " << *kt << "for " << rand_route_node << endl;
+                                        *kt = rand_route_node;
                                     }
                                 }
                                 else{
                                     if(kt == (*jt).end()){
-                                        if(time_matrix[*(kt-1)][rand_route_node]){
+                                        if(time_matrix[*(kt-1)][rand_route_node] != EMPTY)
+                                        {
                                             *kt = rand_route_node;   
                                         }
 
@@ -432,6 +456,7 @@ void solution::mutateChange(double mutate_prob){
                             
                             break;
                         }
+                        idx++;
                     }
                     
                     
@@ -522,23 +547,23 @@ double solution::RouteOperatorCost(std::vector<int>* s){
                 // std::cout << "tt- " << current_time_matrix[*it][*(it + 1)] << std::endl;
                 // std::cout << "tt- " << current_time_matrix[*(it + 1)][*it] << std::endl;
                  // if (current_time_matrix[*it][*(it + 1)] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
-                if (current_time_matrix[*it][*(it + 1)] > 0){
-                    // if (current_time_matrix[*it][*(it + 1)] > 1000){
-                    //     // std::cout << "ctm " << current_time_matrix[*it][*(it + 1)] << std::endl;
+                if (time_matrix[*it][*(it + 1)] > 0){
+                    // if (time_matrix[*it][*(it + 1)] > 1000){
+                    //     // std::cout << "ctm " << time_matrix[*it][*(it + 1)] << std::endl;
                     //     std::cout << "x,y: " << *it << "," << *(it + 1) << std::endl;
                     // }
                     
-                    fo_value += current_time_matrix[*it][*(it + 1)];
+                    fo_value += time_matrix[*it][*(it + 1)];
                 }else{
 
-                    // if (current_time_matrix[*(it + 1)][*it] > 0 && current_time_matrix[*it][*(it + 1)] < 11){
-                    if (current_time_matrix[*(it + 1)][*it] > 0){
-                        // if (current_time_matrix[*(it + 1)][*it] > 1000){
-                        //     // std::cout << "ctm " << current_time_matrix[*(it + 1)][*it] << std::endl;    
+                    // if (time_matrix[*(it + 1)][*it] > 0 && time_matrix[*it][*(it + 1)] < 11){
+                    if (time_matrix[*(it + 1)][*it] > 0){
+                        // if (time_matrix[*(it + 1)][*it] > 1000){
+                        //     // std::cout << "ctm " << time_matrix[*(it + 1)][*it] << std::endl;    
                         //     std::cout << "x,y: " << *(it + 1) << "," << *it << std::endl;
                         // }
                         
-                        fo_value += current_time_matrix[*(it + 1)][*it];
+                        fo_value += time_matrix[*(it + 1)][*it];
                     }
                     else{
                     fo_value += INF;
@@ -697,7 +722,15 @@ void solution::calculate(int iter){
 
     InitializeCostMatrix();
 
-    current_time_matrix = time_matrix;
+    // current_time_matrix = time_matrix;
+
+    for(int i=0;i<nodes;i++)
+    {
+        for(int j=0;j<nodes;j++)
+        {
+            current_time_matrix[i][j] = time_matrix[i][j];
+        }
+    }
 
     evaluateAllCosts(Ag, current_values);
     //printActualValues();
@@ -764,16 +797,17 @@ void solution::calculate(int iter){
             mutateChange(mutation_prob);}
         else{
             /*std::cout << "CHECKPOINT 7b"<< std::endl;*/
-            mutateResize(mutation_prob, minlength, maxlength);}
+            mutateResize(mutation_prob, minlength, maxlength);
+        }
 
         /*std::cout << "CHECKPOINT 8"<< std::endl;*/
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 9"<< std::endl;*/
         calculateCostMatrix(P);
         /*std::cout << "CHECKPOINT 10"<< std::endl;*/
         evaluateAllCosts(P, pool_values);
         /*std::cout << "CHECKPOINT 11"<< std::endl;*/
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         /*std::cout << "CHECKPOINT 12"<< std::endl;*/
         double max_hv = 0.0;
         double current_hv = 0.0;
@@ -800,6 +834,8 @@ void solution::calculate(int iter){
         Solutions tempSol = Solutions(pop_size, Routes(routes, Route(routes, EMPTY)));
 
         tempValues = pool_values;
+
+        int n_sucess = 0;
 
         for(IndIter it=pool_values.begin(); it!=pool_values.end(); it++){
             // max_hv = 0.0;
@@ -835,7 +871,7 @@ void solution::calculate(int iter){
 
                     std::sort(best_sol.begin(), best_sol.end(), SortbyOperatorReverse);
                     max_hv = HyperVolume(best_sol, false);
-                    DestroyMatrix(current_time_matrix);
+                    // DestroyMatrix(current_time_matrix);
 
                     for(int ib=0; ib<temp_current_ag.size(); ib++){
                         tempSol[ib] = P[tempValues[temp_current_ag[ib]].index];
@@ -854,18 +890,21 @@ void solution::calculate(int iter){
 
                     if(max_hv > current_hv){
                         current_ag = best_ag;
-                        DestroyMatrix(current_time_matrix);
+                        n_sucess++;
+                        // DestroyMatrix(current_time_matrix);
                     }
                     else{
                         best_ag = temp_current_ag;
-                        DestroyMatrix(current_time_matrix);
+                        // DestroyMatrix(current_time_matrix);
                         break;
                     }
                 }
 
                 
             }
-
+            if(n_sucess > 5){
+                break;
+            }
             current_idx++;
         }
         /*std::cout << "CHECKPOINT 13"<< std::endl;*/
@@ -891,7 +930,7 @@ void solution::calculate(int iter){
         //printAntigens();
         calculateCostMatrix(Ag);
         evaluateAllCosts(Ag, current_values);
-        DestroyMatrix(current_time_matrix);
+        // DestroyMatrix(current_time_matrix);
         std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
         //printActualValues();
         ref_hv = HyperVolume(current_values, false);
@@ -907,7 +946,7 @@ void solution::calculate(int iter){
     /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
-    //printAntigens();
+    printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     
@@ -916,8 +955,8 @@ void solution::calculate(int iter){
 
     std::sort(current_values.begin(), current_values.end(), SortbyOperatorReverse);
     HyperVolume(current_values, true);
-    DestroyMatrix(current_time_matrix);
-    // PairCost(current_values);
+    // DestroyMatrix(current_time_matrix);
+    PairCost(current_values);
 
     // for(SolIter it=Ag.begin(); it != Ag.end(); ++it){
     //     for(RoutesIter jt=(*it).begin(); jt != (*it).end(); ++jt){
