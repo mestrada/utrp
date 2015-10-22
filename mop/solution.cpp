@@ -946,7 +946,7 @@ void solution::calculate(int iter){
     /*std::cout << "\n--------\n\nFinal Evaluation\n\n--------\n" << std::endl;
     std::cout << "\n--------\n--------\n" << std::endl;
     std::cout << "Ref HV: " << ref_hv << std::endl;*/
-    printAntigens();
+    // printAntigens();
     calculateCostMatrix(Ag);
     evaluateAllCosts(Ag, current_values);
     
